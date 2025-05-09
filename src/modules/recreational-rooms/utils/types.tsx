@@ -16,6 +16,7 @@ export type reservation = {
     room: string,
     date: string,
     time: string,
-    elements: string,
+    elementsResume: string,
+    elements?: Game[] 
     image: string
 }

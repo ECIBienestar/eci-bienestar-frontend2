@@ -1,6 +1,7 @@
 import { GoBell } from "react-icons/go";
 import { FiUser } from "react-icons/fi";
 import { MdLogout } from "react-icons/md";
+import "../utils/RoomReservations.css"
 
 type messageProps ={
     person: string;

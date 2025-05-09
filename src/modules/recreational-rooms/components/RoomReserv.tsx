@@ -1,4 +1,5 @@
 import { type reservation } from "../utils/types"
+import "../utils/RoomReservations.css"
 
 type props = {
     data: reservation;
@@ -9,7 +10,7 @@ function RoomReserv({data}:props){
             <div className="info-reservation">
                 <span>{data.room}</span>
                 <span>{data.date}</span>
-                <span>{data.elements}</span>
+                <span>{data.elementsResume}</span>
             </div>
             <div className="aditional-info">
                 <span>{data.time}</span>

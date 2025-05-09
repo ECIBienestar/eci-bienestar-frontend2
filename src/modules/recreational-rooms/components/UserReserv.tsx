@@ -2,9 +2,10 @@ import Header from "./Header"
 import Options from "./Options"
 import { SlArrowLeftCircle } from "react-icons/sl";
 import RoomReserv from "./RoomReserv"
+import "../utils/RoomReservations.css"
 
-const reservByUser = [{room: "Sala Crea Juegos", date:"Viernes, 9 de Mayo", time:"2:30 - 3:30", elements:"2 elementos reservados", image:"./public/images/room-visual.png"},
-    {room: "Sala Crea Arte", date:"Martes, 13 de Mayo", time:"12:00 - 1:30", elements:"1 elemento reservados", image:"./public/images/room-visual.png"}]
+const reservByUser = [{room: "Sala Crea Juegos", date:"Viernes, 9 de Mayo", time:"2:30 - 3:30", elementsResume:"2 elementos reservados",elements:[{name:"Astucia Naval", image:"./public/images/naval.png"}, {name:"Parques", image:"./public/images/parques.png"}], image:"./public/images/room-visual.png"},
+    {room: "Sala Crea Arte", date:"Martes, 13 de Mayo", time:"12:00 - 1:30", elementsResume:"1 elemento reservados", image:"./public/images/room-visual.png"}]
 
 function UserReserv(){
     return <>

@@ -1,4 +1,5 @@
 import { type room } from "../utils/types"; 
+import "../utils/RoomReservations.css"
 
 type props = {
     data:room;

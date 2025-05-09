@@ -1,5 +1,7 @@
 import Header from "./Header"
 import Options from "./Options"
+import "../utils/RoomReservations.css"
+import "../utils/RoomReservations.css"
 
 function MainE(){
     return <>

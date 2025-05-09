@@ -1,4 +1,5 @@
 import { BsThreeDots } from "react-icons/bs";
+import "../utils/RoomReservations.css"
 
 function Options(){
     return <div className="options-container">

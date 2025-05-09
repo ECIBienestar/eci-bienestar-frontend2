@@ -1,0 +1,469 @@
+body{
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Work Sans', sans-serif;
+}
+
+.header-container{
+    width: 100%;
+    display:flex;
+    align-items: center;
+    background-color: #0E7029;
+    color:  #FEFCFC;
+}
+
+.header-container h1 {
+    margin-left: 3%;
+    margin-right: 10%;
+}
+
+.header-container h2{
+    margin-left: 50%;
+    margin-right: 5%;
+}
+
+.header-container #bell{
+    margin-right: 2%;
+}
+
+.header-container #user{
+    margin-right: 2%;
+}
+
+.main-container{
+    display: flex;
+    flex-direction: row;
+    align-items:  center;
+}
+
+#back{
+    color:#0E7029;
+    transform: translate(-75vh, -20vh);
+
+}
+
+.options-container{
+    margin-top: 2%;
+    margin-left: 2%;
+    margin-bottom: 25%;
+    background-color: #0E7029;
+    width: 30%;
+    color:#FEFCFC;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    box-shadow: 0px 4px 4px rgba(207, 58, 58, 0.25);
+}
+
+.options-container img{
+    margin-top: 10%;
+    width: 7rem;
+}
+
+.options-container #options-botton{
+    margin-top: 70%;
+}
+
+.info-container {
+    margin-top: 3.1%;
+    margin-left: 3%;
+    margin-bottom: 14.5%;
+    display: flex;
+    flex-direction: column;
+    /* align-items: center; */
+}
+
+.welcome-image{
+    position: relative;
+    display: inline-block;
+}
+
+#overload-text{
+    position: absolute;
+    font-size: 5rem;
+    transform: translate(2%, -150%);
+    color: #FEFCFC;
+    font-weight: bold;
+
+}
+
+.actions-section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+
+}
+
+.actions-section p {
+    width: 40%;
+}
+
+.actions-section #buttons {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+
+}
+
+#buttons button{
+    /* Rectangle 143 */
+    width: 361px;
+    height: 91px;
+    left: 967px;
+    top: 830px;
+
+    background: #0E7029;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    color:#FEFCFC;
+    font-size: 2.5rem;
+
+}
+
+#reservar {
+    margin-bottom: 10%;
+}
+
+.rooms{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-left: 10%;
+    width: 110%;
+}
+
+.rooms h2{
+    font-size: 4rem;
+}
+
+.rooms .cards{
+    margin-top: 5%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.room-card {
+    width: 100%;
+    margin-right: 10%;
+    margin-left: 10%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 6px 6px 15px 1px rgba(0, 0, 0, 0.25);
+    border-radius: 15px;
+    font-size: 1.5rem;
+
+}
+
+#room-name{
+    width: 100%;
+    background-color: #0E7029;
+    border-top-right-radius: 15px;
+    border-top-left-radius: 15px;
+}
+
+#room-name h3{
+    padding-left: 2%;
+    color: #FEFCFC;
+    font-weight: lighter;
+}
+
+.room-card img {
+    margin-top: 3%;
+    width: 70%;
+}
+
+#room-description h3{
+    padding-left: 5%;
+    font-weight: lighter;
+}
+
+.user-reservations{
+    width: 155%;
+    margin-left:3%;
+    margin-right: 3%;
+    margin-bottom: 25%;
+}
+
+.options-reservations-panel{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    transform: translate(-0%, -50%);
+}
+
+.options-reservations-panel svg{
+    color:#0E7029;
+}
+
+.options-reservations-panel h2{
+    font-size: 3rem;
+    margin-right: 40%;
+    margin-left: 3%;
+
+}
+
+.links{
+    display: flex;
+    border-bottom: 2px solid black;
+    gap: 6rem;
+    /* padding-bottom: 0.5rem; */
+    font-size: 1.4rem;
+}
+
+.reservation-card{
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    background: #F6F6F7;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 2rem;
+    margin-top: 2%;
+
+}
+
+.info-reservation{
+    display: flex;
+    flex-direction: column;
+    width: 150%;
+    gap: 6%;
+    margin-left: 2%;
+
+}
+
+.aditional-info{
+    display: flex;
+    flex-direction: column;
+    margin-left: 50%;
+}
+
+.aditional-info img{
+    width: 85%;
+    margin-top: 2%;
+    margin-bottom: 2%;
+}
+
+
+.display-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-left: 25%;
+    margin-top: 25%;
+    transform: translate(0,-50vh);
+}
+
+.parcial-header{
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    width: 100%;
+    font-size: 3rem;
+}
+
+.parcial-header svg{
+    color: #0E7029;
+    transform: translate(-40vh);
+}
+
+.display-info {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 20vh;
+    font-size: 1.5rem;
+}
+
+.display-container span {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.6);
+    border-radius: 5px;
+}
+
+.date-reservation {
+    width: 65%;
+    transform: translate(-40vh);
+    
+}
+
+.date-reservation svg{
+    margin-left: 10%;
+}
+
+
+.hours-time{
+    width: 50%;
+    transform: translate(-10vh);
+}
+
+.hours-time svg{
+    margin-left: 25%;
+}
+
+.selected-room{
+    margin-top: 2%;
+    font-size: 1.5rem;
+    width: 50%;
+    transform: translate(-68vh);
+}
+
+.selected-room svg{
+    margin-left: 35%;
+}
+
+
+.selector-items{
+    width: 100%;
+    margin-top: 2%;
+    padding-left: 48%;
+    transform: translate(-67vh);
+}
+
+.selector-items h4 {
+    font-size: 1.5rem;
+}
+
+.games-options {
+    display: flex;
+    margin-left: 10%;
+}
+
+.game-item {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-item input{
+    margin-top: 10%;
+    width: 2rem;
+    height: 2rem;
+    accent-color: #0E7029;
+}
+
+.games-options img {
+    width: 80%;
+    margin-top: 2%;
+}
+
+.display-container button {
+    width: 40%;
+    margin-top: 25%;
+    background: #0E7029;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    color:#FEFCFC;
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.game-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #F6F6F7;
+    box-shadow: 0px 8px 15px 1px rgba(0, 0, 0, 0.25);
+    border-radius: 15px;
+    margin-right: 6%;
+    font-size: 2rem;
+    font-weight: lighter;
+
+}
+
+.general-information{
+    width: 100%;
+    height: 100%;
+    margin-left: 3%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.general-information svg{
+    color: #0E7029;
+    transform: translate(-52vh);
+} 
+
+.general-information button {
+    width: 25vh;
+    height: 7vh;
+    background: #0E7029;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    color:#FEFCFC;
+    font-size: 2.5rem;
+    transform: translate(40vh, 5vh);
+}
+
+.reserve-header {
+    display: flex;
+    align-items: center;
+}
+
+.room-information {
+    width: 100%;
+    margin-top: 2%;
+    /* margin-left: 17%; */
+    font-size: 2rem;
+}
+
+.room-information img {
+    width: 50%;
+}
+
+.characteristics {
+    margin-top: 2%;
+    display: flex;
+    width: 85%;
+    gap: 4vh;
+    margin-bottom: 3%;
+}
+
+.calendar-space{
+    align-items: center;
+}
+
+.calendar-table {
+  width: 80%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin-top:5%;
+  margin-left: 8%;
+  overflow: hidden;
+  border-radius: 10px;
+  /* min-width: 700px; */
+}
+
+.calendar-table th,
+.calendar-table td {
+  border: 1px solid #5F408A;
+  /* padding: 8px; */
+  text-align: center;
+  word-wrap: break-word;
+  height: 9vh;
+}
+
+.calendar-table thead {
+  background-color: #0E7029;
+  color:#F6F6F7;
+}
+
+.calendar-cell:hover {
+  background-color: #F6F6F7;
+  cursor: pointer;
+}
+
+#text-newReserv {
+    transform: translate(-10vh);
+}
