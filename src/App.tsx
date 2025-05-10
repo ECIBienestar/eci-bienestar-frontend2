@@ -17,10 +17,10 @@ function App() {
     {/* < MainE /> */}
     {/* < QueryRooms />  */}
      {/* <UserReserv />  */}
-    {/* <InfoReserv /> */}
+    <InfoReserv />
     {/* <InfoCalendar /> */}
     {/* <NewReservation /> */}
-    <Confirmation />
+    {/* <Confirmation /> */}
     </>
   )
 }
