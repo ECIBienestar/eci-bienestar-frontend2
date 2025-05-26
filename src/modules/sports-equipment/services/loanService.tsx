@@ -12,6 +12,8 @@ export const getActiveLoansByUser = async (userId: string) => {
 };
 
 
+
+
 export const getReturnedLoansByUser = async (userId: string) => {
     const response = await fetch(
         "https://sport-loan-service-hvaxcffmfkh6asdn.canadacentral-01.azurewebsites.net/api/v1.0/loans/returned-by-user",

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getMockedImageByCategory, getExpiredImageByName } from "../utils/imageMapper.ts"; // Ajusta el path si es necesario
 
 interface ArticuloVencido {
     id: number;
@@ -13,24 +14,22 @@ const Expired = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-
         const fetchVencidos = async () => {
             setLoading(true);
             try {
-
                 const data: ArticuloVencido[] = [
                     {
                         id: 1,
                         nombre: "Balón Adidas",
                         descripcion: "Uso exclusivo para torneos",
-                        imagen: "",
+                        imagen: getMockedImageByCategory(getExpiredImageByName("Balón Adidas")),
                         fechaFin: "2025-05-10",
                     },
                     {
                         id: 2,
                         nombre: "Raqueta Wilson",
                         descripcion: "Prestada por más de 3 días",
-                        imagen: "",
+                        imagen: getMockedImageByCategory(getExpiredImageByName("Raqueta Wilson")),
                         fechaFin: "2025-05-08",
                     },
                 ];

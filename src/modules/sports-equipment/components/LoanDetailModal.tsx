@@ -1,4 +1,5 @@
 import React from "react";
+import { getMockedImageByCategory, getExpiredImageByName } from "@modules/sports-equipment/utils/imageMapper.ts";
 
 interface LoanDetail {
     id: number;
@@ -13,13 +14,16 @@ interface LoanDetail {
 }
 
 interface LoanDetailsModalProps {
-    isOpen: boolean,
-    onClose: () => void,
-    data?: LoanDetail | null,
+    isOpen: boolean;
+    onClose: () => void;
+    data?: LoanDetail | null;
 }
 
-const LoanDetailsModal: React.FC<LoanDetailsModalProps> = ({isOpen, onClose, data}) => {
+const LoanDetailsModal: React.FC<LoanDetailsModalProps> = ({ isOpen, onClose, data }) => {
     if (!isOpen || !data) return null;
+
+    const imagenSrc = data.imagen
+        || getMockedImageByCategory(getExpiredImageByName(data.nombreArticulo));
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -35,14 +39,13 @@ const LoanDetailsModal: React.FC<LoanDetailsModalProps> = ({isOpen, onClose, dat
 
                 <div className="flex justify-center mb-4">
                     <img
-                        src={data.imagen || "https://via.placeholder.com/100"}
+                        src={imagenSrc}
                         alt={data.nombreArticulo}
                         className="w-24 h-24 object-contain"
                     />
                 </div>
 
                 <div className="text-sm text-gray-800 space-y-1">
-                    <p><strong>Id del artículo:</strong> {data.id}</p>
                     <p><strong>Usuario:</strong> {data.usuario}</p>
                     <p><strong>Nombre del artículo:</strong> {data.nombreArticulo}</p>
                     <p><strong>Estado durante el préstamo:</strong> {data.estado}</p>

@@ -14,12 +14,12 @@
 
     const Loaned: React.FC = () => {
         const [reservas, setReservas] = useState<Reservation[]>([]);
-        const [selectedReserva, setSelectedReserva] = useState<Reservation | null>(null);
+        const [selectedReserva] = useState<Reservation | null>(null);
         const today = new Date();
         const startOfWeek = new Date(today);
         const day = today.getDay();
         const diffToMonday = day === 0 ? -6 : 1 - day;
-        startOfWeek.setDate(today.getDate() + diffToMonday + 7);
+        startOfWeek.setDate(today.getDate() + diffToMonday + 1);
 
         useEffect(() => {
             const loadReservations = async () => {
