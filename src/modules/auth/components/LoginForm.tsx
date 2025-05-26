@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import logo from "../../../assets/images/logo/ECIBienestarTransparent.png";
+import logo from "../../../assets/images/logo/ECIBienestarWhite.png";
 import apiClient from "../../../common/services/apiClient";
 import { useAuth } from "@/common/context";
 import { User, LoginResponse } from "@/common/types";
@@ -57,75 +57,71 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen font-sans ">
-      <div className=" bg-white flex flex-col items-center justify-center p-8">
-        <div className="text-center mb-8">
-          <img src={logo} alt="Logo" className="mx-auto w-auto h-[10rem]" />
-          <h2 className="text-[35px] font-bold text-[#cf3a3a]">
-            Inicio de Sesión
-          </h2>
-        </div>
-
-        <div className="w-full max-w-[400px] min-w-[200px] p-8 rounded-[30px] bg-[#cf3a3a] shadow-md">
-          <form onSubmit={handleSubmit}>
-            <div className="mb-61">
-              <label
-                htmlFor="email"
-                className="block mb-2 text-[#ffffff] font-bold text-[15px]"
-              >
-                Correo
-              </label>
-              <input
-                className="w-full p-3 border border-[#bdc3c7] text-base text-[#000000] rounded-[30px] mb-5"
-                type="email"
-                id="email"
-                value={username}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="usuario@mail.escuela.edu.co"
-                required
-              />
-            </div>
-
-            <div className="block mb-2 text-[#ffffff] font-bold">
-              <label
-                htmlFor="password"
-                className="block mb-2 text-[#ffffff] font-bold text-[15px]"
-              >
-                Contraseña
-              </label>
-              <input
-                className="w-full p-3 border border-[#bdc3c7] rounded-[30px] text-base text-[#000000] mb-5"
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="********"
-                required
-              />
-            </div>
-
-            {error && <p className="form-error">{error}</p>}
-
-            <div className="flex flex-col items-center">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full p-3 bg-[#990000] text-white border-none rounded-[30px] text-base cursor-pointer mb-4"
-              >
-                {isLoading ? "Cargando..." : "Iniciar Sesión"}
-              </button>
-              <Link
-                to="/forgot-password"
-                className="text-[#7aa6ff] no-underline text-[1.2rem]"
-              >
-                ¿Olvidaste tu contraseña?
-              </Link>
-            </div>
-          </form>
-        </div>
+    <div className="w-full max-w-md p-6 sm:p-8 rounded-2xl bg-[#cf3a3a] shadow-md">
+      <div className="text-center mb-8">
+        <img src={logo} alt="Logo" className="mx-auto w-auto h-[10rem]" />
+        <h2 className="text-[35px] font-bold text-[#cf3a3a]">
+          Inicio de Sesión
+        </h2>
       </div>
+
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label
+            htmlFor="email"
+            className="block mb-2 text-[#ffffff] font-bold text-[15px]"
+          >
+            Correo
+          </label>
+          <input
+            className="w-full p-3 border border-[#bdc3c7] text-base text-[#000000] rounded-[30px] mb-5"
+            type="email"
+            id="email"
+            value={username}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="usuario@mail.escuela.edu.co"
+            required
+          />
+        </div>
+
+        <div className="mb-4">
+          <label
+            htmlFor="password"
+            className="block mb-2 text-[#ffffff] font-bold text-[15px]"
+          >
+            Contraseña
+          </label>
+          <input
+            className="w-full p-3 border border-[#bdc3c7] rounded-[30px] text-base text-[#000000] mb-5"
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="********"
+            required
+          />
+        </div>
+
+        {error && <p className="mb-4 text-red-200 text-sm">{error}</p>}
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full py-2 bg-[#990000] text-white rounded-full font-medium hover:bg-opacity-90 transition"
+        >
+          {isLoading ? "Cargando..." : "Iniciar Sesión"}
+        </button>
+
+        <div className="mt-4 text-center">
+          <Link
+            to="/forgot-password"
+            className="text-sm sm:text-base text-[#7aa6ff]"
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </div>
+      </form>
     </div>
   );
 };
-
 export default Login;
