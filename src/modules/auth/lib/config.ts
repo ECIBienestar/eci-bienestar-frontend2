@@ -1,0 +1,1 @@
+export const API_AUTH_URL = 'https://suoeltmtp2.execute-api.us-east-1.amazonaws.com/auth'
