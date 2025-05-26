@@ -12,6 +12,7 @@ import { useAuth } from "./common/context";
 import { Role } from "./common/types";
 import { ProtectedRoute, Root } from "@common/components";
 import HealthRoutes from "./modules/appointment-management/routes/HealthRoutes";
+import SportsHome from './modules/sports-equipment/SportsRouter.tsx';
 
 const MODULE_MAPPING = {
   health: "turnos",
@@ -128,7 +129,7 @@ function App() {
               activeModule={MODULE_MAPPING.sports}
               onNotificationsClick={handleNotificationsClick}
             >
-              <ModuleTemplate title="Préstamos Deportivos" />
+              <SportsHome />
             </Layout>
           }
         />
