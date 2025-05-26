@@ -1,0 +1,1 @@
+export const API_BASE_URL_RECREATIONAL_ROOMS = "https://ecibienestar-booking-hnbeerf3caafcacs.canadacentral-01.azurewebsites.net";

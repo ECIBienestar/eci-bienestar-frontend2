@@ -14,6 +14,17 @@ import Students from "./modules/user-administration/pages/StudentsPage";
 import Staff from "./modules/user-administration/pages/StaffPage";
 import Teachers from "./modules/user-administration/pages/TeachersPage";
 import Doctors from "./modules/user-administration/pages/DoctorsPage";
+import ForgotPassword from "./modules/auth/components/ForgotPassword";
+
+// Importar rutas de módulos
+import RecreationalRoomsRoutes from "@modules/recreational-rooms/routes";
+import ExtracurricularClassesRoutes from "./modules/extracurricular-classes/routes";
+
+import { useAuth } from "./common/context";
+import { Role } from "./common/types";
+import { ProtectedRoute, Root } from "@common/components";
+import HealthRoutes from "./modules/appointment-management/routes/HealthRoutes";
+import SportsHome from './modules/sports-equipment/SportsRouter.tsx';
 
 const MODULE_MAPPING = {
   health: "turnos",
@@ -25,7 +36,7 @@ const MODULE_MAPPING = {
   statistics: "estadisticas",
 };
 
-// Module colors
+// Module Colors
 const moduleColors = {
   health: "#0078B4", // Turnos de Salud
   recreation: "#0E7029", // Salas Recreativas
@@ -41,6 +52,7 @@ const moduleColors = {
 const ModuleTemplate: React.FC<{ title: string; color: string }> = ({
   title,
 }) => (
+
   <div className="container mx-auto px-4 py-8">
     <h1 className="text-3xl font-bold text-gray-800 mb-6">{title}</h1>
     <div className="bg-white rounded-lg shadow p-6">
@@ -52,26 +64,21 @@ const ModuleTemplate: React.FC<{ title: string; color: string }> = ({
 );
 
 function App() {
-  const handleLogout = () => {
-    console.log("Cerrando sesión...");
-    localStorage.removeItem("user");
-    window.location.href = "/";
-  };
-
+  const { user } = useAuth();
   const handleNotificationsClick = () => {
     console.log("Mostrando notificaciones...");
     // Aquí iría la lógica para mostrar notificaciones
   };
 
   return (
-    <Router>
-      <Routes>
-        {/* Ruta inicial - login */}
-        <Route path="/" element={<Login />} />
+    <Routes>
+      {/* Ruta inicial - login */}
+      <Route path="/" element={<Root />} />
 
-        {/* Restaurar contrasena*/}
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+      {/* Restaurar contrasena*/}
+      <Route path="/forgot-password" element={<ForgotPassword />} />
 
+      <Route element={<ProtectedRoute />}>
         {/* Ruta principal - Dashboard */}
         <Route
           path="/home"
@@ -79,9 +86,7 @@ function App() {
             <Layout
               moduleColor={moduleColors.default}
               showSidebar={true}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
             >
               <Dashboard />
             </Layout>
@@ -95,18 +100,13 @@ function App() {
             <Layout
               moduleColor={moduleColors.health}
               activeModule={MODULE_MAPPING.health}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
+              showSidebar={user?.role === Role.ADMINISTRATOR}
             >
-              <ModuleTemplate
-                title="Gestión de Turnos de Salud"
-                color={moduleColors.health}
-              />
+              <HealthRoutes />
             </Layout>
           }
         />
-
         {/* Módulo de Recreación/Salas */}
         <Route
           path="/modules/recreation/*"
@@ -114,14 +114,9 @@ function App() {
             <Layout
               moduleColor={moduleColors.recreation}
               activeModule={MODULE_MAPPING.recreation}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
             >
-              <ModuleTemplate
-                title="Gestión de Salas Recreativas"
-                color={moduleColors.recreation}
-              />
+              <RecreationalRoomsRoutes />
             </Layout>
           }
         />
@@ -133,14 +128,9 @@ function App() {
             <Layout
               moduleColor={moduleColors.extracurricular}
               activeModule={MODULE_MAPPING.extracurricular}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
             >
-              <ModuleTemplate
-                title="Clases Extracurriculares"
-                color={moduleColors.extracurricular}
-              />
+              <ExtracurricularClassesRoutes userRole="student" />
             </Layout>
           }
         />
@@ -152,14 +142,9 @@ function App() {
             <Layout
               moduleColor={moduleColors.sports}
               activeModule={MODULE_MAPPING.sports}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
             >
-              <ModuleTemplate
-                title="Préstamos Deportivos"
-                color={moduleColors.sports}
-              />
+              <SportsHome />
             </Layout>
           }
         />
@@ -171,14 +156,9 @@ function App() {
             <Layout
               moduleColor={moduleColors.gym}
               activeModule={MODULE_MAPPING.gym}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
             >
-              <ModuleTemplate
-                title="Gestión del Gimnasio"
-                color={moduleColors.gym}
-              />
+              <ModuleTemplate title="Gestión del Gimnasio" />
             </Layout>
           }
         />
@@ -190,13 +170,11 @@ function App() {
             <Layout
               moduleColor={moduleColors.statistics}
               activeModule={MODULE_MAPPING.statistics}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
             >
               <ModuleTemplate
                 title="Estadísticas y Reportes"
-                color={moduleColors.statistics}
+                // color={moduleColors.statistics}
               />
             </Layout>
           }
@@ -209,9 +187,7 @@ function App() {
             <Layout
               moduleColor={moduleColors.users}
               activeModule={MODULE_MAPPING.users}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
             >
               <div className="w-full h-full flex flex-col p-6 lg:p-8">
                 <div className="container mx-auto px-4 py-8 h-full">
@@ -233,10 +209,9 @@ function App() {
           <Route path="doctors" element={<Doctors />} />
         </Route>
 
-        {/* Ruta de fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+      {/* Ruta de fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
