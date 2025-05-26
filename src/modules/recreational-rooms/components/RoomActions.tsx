@@ -51,7 +51,7 @@ const navigationOptions = [
 	{
 		label: "Reportes",
 		description: "Genera reportes de reservas y elementos",
-		to: "/modules/recreation/reports",
+		to: "/modules/recreation/statistics",
 		icon: ChartBarIcon,
 		roles: [Role.ADMINISTRATOR]
 	},
