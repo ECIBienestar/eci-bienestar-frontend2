@@ -2,7 +2,6 @@ import { Card, CardHeader, CardBody } from "@heroui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBoxes, faChartColumn } from "@fortawesome/free-solid-svg-icons";
 import coliseoImg from "@modules/sports-equipment/Images-sport-equipment/coliseo.jpg";
-import detalleImg from "@modules/sports-equipment/Images-sport-equipment/equipment.jpg";
 import { useNavigate } from "react-router-dom";
 
 const Home = () => {

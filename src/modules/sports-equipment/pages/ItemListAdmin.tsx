@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getItemsByCategory } from "../services/itemService";
 import { createLoan } from "../services/itemService";
+import {getMockedImageByCategory} from "@modules/sports-equipment/utils/imageMapper.ts";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faArrowLeft,
@@ -10,6 +11,7 @@ import {
     faPenToSquare,
     faGears,
 } from "@fortawesome/free-solid-svg-icons";
+
 
 interface Item {
     id: string;
@@ -42,9 +44,20 @@ const ItemList = () => {
             setLoading(true);
             setError(null);
             try {
-                if (id && VALID_CATEGORIES.includes(id)) {
-                    const data = await getItemsByCategory(id);
-                    setItems(data as Item[]);
+                if (id) {
+                    if (VALID_CATEGORIES.includes(id)) {
+                        const data = await getItemsByCategory(id);
+
+                        // 🔽 AQUÍ mockeamos las imágenes
+                        const dataWithImages = (data as Item[]).map(item => ({
+                            ...item,
+                            imagen: item.imagen || getMockedImageByCategory(item.categoria),
+                        }));
+
+                        setItems(dataWithImages);
+                    } else {
+                        setItems([]);
+                    }
                 } else {
                     setItems([]);
                 }
@@ -125,9 +138,6 @@ const ItemList = () => {
 
             alert("Ítem eliminado exitosamente.");
             console.log("Ítem eliminado:", itemId);
-
-            // Aquí puedes actualizar tu lista local de ítems, si la estás usando:
-            // setItems(prev => prev.filter(item => item.id !== itemId));
 
         } catch (error) {
             console.error("Error al eliminar ítem:", error);
@@ -599,7 +609,9 @@ const ItemList = () => {
                             ×
                         </button>
 
-                        <h2 className="text-xl font-semibold mb-4">Panel de Información</h2>
+                        <div className="bg-[#4B1E0D] rounded-t-lg p-4">
+                            <h3 className="text-lg font-bold text-white">Panel de Información</h3>
+                        </div>
 
                         <div className="space-y-3 text-[#1E1E1E]">
                             <p>
