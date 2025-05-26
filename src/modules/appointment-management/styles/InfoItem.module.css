@@ -1,0 +1,11 @@
+.GENERAL_MEDICINE {
+  @apply text-health-medicine-primary;
+}
+
+.DENTISTRY {
+  @apply text-health-primary;
+}
+
+.PSYCHOLOGY {
+  @apply text-health-psychology-primary;
+}

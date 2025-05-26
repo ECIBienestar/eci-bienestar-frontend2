@@ -30,6 +30,10 @@ export default {
         "health-medicine-dark": "#0D9488",
         "health-psychology-primary": "#EFB100",
         "health-psychology-dark": "#B38400",
+
+        // Recreation Rooms module colors
+        "recreation-primary": "#0E7029",
+        "recreation-primary-light": "#2DA14D",
       },
     },
   },
