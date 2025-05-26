@@ -1,42 +1,28 @@
 import { useState } from "react";
+import { CarroselItem } from "@/modules/appointment-management/types/carroselType";
 
-// Definir los datos iniciales fuera del componente para mantener la lógica más limpia
-const initialItems = [
-  {
-    id: 1,
-    type: "imagen",
-    name: "Servicio de bienestar universitario",
-    url: "https://example.com/1.jpg",
-    duration: 8,
-  },
-  {
-    id: 1,
-    type: "imagen",
-    name: "Programa de salud mental",
-    url: "https://example.com/1.jpg",
-    duration: 8,
-  },
-  {
-    id: 2,
-    type: "video",
-    name: "Actvidades deportivas",
-    url: "https://example.com/2.mp4",
-    duration: 15,
-  },
-];
-
-const hookGestionMultimediaPanel = () => {
+const hookGestionMultimediaPanel = (
+  initial: CarroselItem[] = [],
+  onUpdateList?: (newList: CarroselItem[]) => void
+) => {
   const [selectedDuration, setSelectedDuration] = useState("8");
-  const [list, setList] = useState(initialItems);
+  const [list, setList] = useState<CarroselItem[]>(initial);
   const [pendingDelete, setPendingDelete] = useState<Set<number>>(new Set());
 
   const handleDelete = (id: number): void => {
-    setPendingDelete((prev) => new Set(prev.add(id)));
+    setPendingDelete((prev) => new Set(prev).add(id));
   };
 
   const handleSaveChanges = () => {
-    setList((prev) => prev.filter((item) => !pendingDelete.has(item.id)));
+    const updatedList = list.filter((item) => !pendingDelete.has(item.id));
+    setList(updatedList);
     setPendingDelete(new Set());
+
+    if (onUpdateList) {
+      onUpdateList(updatedList);
+    }
+
+    return updatedList;
   };
 
   const resetPendingDelete = () => {
@@ -50,7 +36,7 @@ const hookGestionMultimediaPanel = () => {
     pendingDelete,
     handleDelete,
     handleSaveChanges,
-    resetPendingDelete, 
+    resetPendingDelete,
   };
 };
 

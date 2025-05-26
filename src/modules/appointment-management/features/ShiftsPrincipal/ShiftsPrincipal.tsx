@@ -7,7 +7,6 @@ import {
   faChartSimple,
 } from "@fortawesome/free-solid-svg-icons";
 import ShiftsUser from "../../components/shiftsUser/shiftsUser";
-import { carroselItems } from "./datosMock";
 import { useNavigate } from "react-router-dom";
 
 const ShiftsPrincipal = () => {
@@ -45,7 +44,7 @@ const ShiftsPrincipal = () => {
           </div>
         </div>
       }
-      body={<ShiftsUser carroselItems={carroselItems} />}
+      body={<ShiftsUser />}
     />
   );
 };

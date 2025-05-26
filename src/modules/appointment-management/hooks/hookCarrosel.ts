@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { CarroselItem } from "../types/carroselType";
+import { MultimediaResponse } from "../types/dto/response/MultimediaResponse";
 
 const FADE_DURATION = 500;
 
-export const hookCarrosel = (items: CarroselItem[]) => {
+export const hookCarrosel = (items: MultimediaResponse[]) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visible, setVisible] = useState(true);
 
@@ -24,10 +24,12 @@ export const hookCarrosel = (items: CarroselItem[]) => {
     };
   }, [currentIndex, items]);
 
+  const current = items.length > 0 ? items[currentIndex] : null;
+
   return {
     currentIndex,
     visible,
-    current: items[currentIndex],
+    current,
     fadeDuration: FADE_DURATION,
   };
 };

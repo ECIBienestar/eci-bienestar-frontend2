@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import Modal from '../../components/common/modal';
-import { useCreateClass } from '../../hooks/useClasses';
+import React, { useState } from "react";
+import Modal from "../../components/common/modal";
+import { useCreateClass } from "../../hooks/useClasses";
 
 interface AddClassModalProps {
   isOpen: boolean;
@@ -8,108 +8,120 @@ interface AddClassModalProps {
   onSuccess: () => void;
 }
 
-const AddClassModal: React.FC<AddClassModalProps> = ({ isOpen, onClose, onSuccess }) => {
-  const { createNewClass, loading, error, success, reset } = useCreateClass();
-  
+const AddClassModal: React.FC<AddClassModalProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+}) => {
+  const { createNewClass, loading, error, reset } = useCreateClass();
+
   const [formData, setFormData] = useState({
-    name: '',
-    type: '',
-    repetition: '',
-    instructorId: '',
-    startTime: '',
-    endTime: '',
+    name: "",
+    type: "",
+    repetition: "",
+    instructorId: "",
+    startTime: "",
+    endTime: "",
     maxStudents: 0,
-    resources: [] as { nombre: string; cantidad: number }[]
+    resources: [] as { nombre: string; cantidad: number }[],
   });
-  
-  const [resource, setResource] = useState({ nombre: '', cantidad: 0 });
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+
+  const [resource, setResource] = useState({ nombre: "", cantidad: 0 });
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    if (name === 'maxStudents') {
+    if (name === "maxStudents") {
       setFormData({
         ...formData,
-        [name]: parseInt(value) || 0
+        [name]: parseInt(value) || 0,
       });
     } else {
       setFormData({
         ...formData,
-        [name]: value
+        [name]: value,
       });
     }
   };
-  
+
   const handleAddResource = () => {
-    if (resource.nombre.trim() !== '') {
+    if (resource.nombre.trim() !== "") {
       setFormData({
         ...formData,
-        resources: [...formData.resources, { ...resource }]
+        resources: [...formData.resources, { ...resource }],
       });
-      setResource({ nombre: '', cantidad: 0 });
+      setResource({ nombre: "", cantidad: 0 });
     }
   };
-  
+
   const handleResourceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if (name === 'cantidad') {
+    if (name === "cantidad") {
       setResource({
         ...resource,
-        [name]: parseInt(value) || 0
+        [name]: parseInt(value) || 0,
       });
     } else {
       setResource({
         ...resource,
-        [name]: value
+        [name]: value,
       });
     }
   };
-  
+
   const handleRemoveResource = (index: number) => {
     const updatedResources = [...formData.resources];
     updatedResources.splice(index, 1);
     setFormData({
       ...formData,
-      resources: updatedResources
+      resources: updatedResources,
     });
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const result = await createNewClass({
       ...formData,
-      endTimeRepetition: formData.repetition || null
+      endTimeRepetition: formData.repetition || null,
     });
-    
+
     if (result) {
       onSuccess();
       handleClose();
     }
   };
-  
+
   const handleClose = () => {
     reset();
     setFormData({
-      name: '',
-      type: '',
-      repetition: '',
-      instructorId: '',
-      startTime: '',
-      endTime: '',
+      name: "",
+      type: "",
+      repetition: "",
+      instructorId: "",
+      startTime: "",
+      endTime: "",
       maxStudents: 0,
-      resources: []
+      resources: [],
     });
-    setResource({ nombre: '', cantidad: 0 });
+    setResource({ nombre: "", cantidad: 0 });
     onClose();
   };
-  
+
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Agregar Nueva Clase">
       <form onSubmit={handleSubmit} className="space-y-4">
-        {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>}
-        
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {error}
+          </div>
+        )}
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Nombre
+          </label>
           <input
             type="text"
             name="name"
@@ -119,9 +131,11 @@ const AddClassModal: React.FC<AddClassModalProps> = ({ isOpen, onClose, onSucces
             required
           />
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Tipo
+          </label>
           <select
             name="type"
             value={formData.type}
@@ -135,9 +149,11 @@ const AddClassModal: React.FC<AddClassModalProps> = ({ isOpen, onClose, onSucces
             <option value="Académica">Académica</option>
           </select>
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Instructor</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Instructor
+          </label>
           <input
             type="text"
             name="instructorId"
@@ -147,10 +163,12 @@ const AddClassModal: React.FC<AddClassModalProps> = ({ isOpen, onClose, onSucces
             required
           />
         </div>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Hora de inicio</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Hora de inicio
+            </label>
             <input
               type="time"
               name="startTime"
@@ -161,7 +179,9 @@ const AddClassModal: React.FC<AddClassModalProps> = ({ isOpen, onClose, onSucces
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Hora de fin</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Hora de fin
+            </label>
             <input
               type="time"
               name="endTime"
@@ -172,9 +192,11 @@ const AddClassModal: React.FC<AddClassModalProps> = ({ isOpen, onClose, onSucces
             />
           </div>
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Repetición</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Repetición
+          </label>
           <select
             name="repetition"
             value={formData.repetition}
@@ -190,9 +212,11 @@ const AddClassModal: React.FC<AddClassModalProps> = ({ isOpen, onClose, onSucces
             <option value="Vie">Viernes</option>
           </select>
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Capacidad máxima</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Capacidad máxima
+          </label>
           <input
             type="number"
             name="maxStudents"
@@ -203,10 +227,10 @@ const AddClassModal: React.FC<AddClassModalProps> = ({ isOpen, onClose, onSucces
             required
           />
         </div>
-        
+
         <div className="border-t pt-4 mt-4">
           <h3 className="text-md font-medium mb-2">Recursos necesarios</h3>
-          
+
           <div className="flex space-x-2 mb-2">
             <input
               type="text"
@@ -219,7 +243,7 @@ const AddClassModal: React.FC<AddClassModalProps> = ({ isOpen, onClose, onSucces
             <input
               type="number"
               name="cantidad"
-              value={resource.cantidad || ''}
+              value={resource.cantidad || ""}
               onChange={handleResourceChange}
               placeholder="Cantidad"
               className="w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -233,11 +257,14 @@ const AddClassModal: React.FC<AddClassModalProps> = ({ isOpen, onClose, onSucces
               +
             </button>
           </div>
-          
+
           {formData.resources.length > 0 && (
             <div className="mt-2 border rounded-md overflow-hidden">
               {formData.resources.map((item, index) => (
-                <div key={index} className="flex justify-between items-center p-2 border-b last:border-b-0">
+                <div
+                  key={index}
+                  className="flex justify-between items-center p-2 border-b last:border-b-0"
+                >
                   <div>
                     {item.nombre} ({item.cantidad})
                   </div>
@@ -246,8 +273,19 @@ const AddClassModal: React.FC<AddClassModalProps> = ({ isOpen, onClose, onSucces
                     onClick={() => handleRemoveResource(index)}
                     className="text-red-500 hover:text-red-700"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -255,7 +293,7 @@ const AddClassModal: React.FC<AddClassModalProps> = ({ isOpen, onClose, onSucces
             </div>
           )}
         </div>
-        
+
         <div className="flex justify-end space-x-2 pt-4">
           <button
             type="button"
@@ -269,7 +307,7 @@ const AddClassModal: React.FC<AddClassModalProps> = ({ isOpen, onClose, onSucces
             className="px-4 py-2 bg-[#362550] text-white rounded-md hover:bg-purple-700 disabled:opacity-50"
             disabled={loading}
           >
-            {loading ? 'Guardando...' : 'Guardar'}
+            {loading ? "Guardando..." : "Guardar"}
           </button>
         </div>
       </form>

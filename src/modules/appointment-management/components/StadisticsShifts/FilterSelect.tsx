@@ -8,7 +8,7 @@ type FilterSelectProps = {
 
 const FilterSelect = ({ label, options, value, onChange, placeholder }: FilterSelectProps) => {
   return (
-    <div className="flex-1">
+    <div className="flex-1 min-w-0"> {/* min-w-0 para evitar overflow */}
       <h3 className="font-semibold">{label}</h3>
       <select
         value={value}

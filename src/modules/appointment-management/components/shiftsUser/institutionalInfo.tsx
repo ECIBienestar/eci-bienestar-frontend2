@@ -1,13 +1,24 @@
-import { useDisclosure } from "@heroui/react";
-import { Card, CardHeader, CardBody, Modal, ModalContent } from "@heroui/react";
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Modal,
+  ModalContent,
+  useDisclosure,
+} from "@heroui/react";
 import Carrosel from "./carrosel/carrosel";
-import { GestionMultimediaPanel } from "../gestionMultimediaPanel";
+import GestionMultimediaPanel from "@/modules/appointment-management/components/gestionMultimediaPanel/gestionMultimediaPanel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
-import { CarroselProps } from "../../types/carroselType";
+import { MultimediaResponse } from "../../types/dto/response/MultimediaResponse";
+import { ShowErrorMessage, ShowLoading } from "../common";
+import { useAllMultimedia } from "../../hooks";
 
-const InstitutionalInfo = ({ items }: CarroselProps) => {
+const InstitutionalInfo = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { data, isLoading, isError } = useAllMultimedia();
+
+  const items: MultimediaResponse[] = data?.data || [];
 
   return (
     <>
@@ -29,7 +40,13 @@ const InstitutionalInfo = ({ items }: CarroselProps) => {
         </CardHeader>
 
         <CardBody className="py-0 px-0 flex-col items-start h-[600px]">
-          <Carrosel items={items} />
+          {isLoading && <ShowLoading />}
+
+          {!isLoading && isError && (
+            <ShowErrorMessage message="Error al cargar los contenidos multimedia" />
+          )}
+
+          {!isLoading && !isError && <Carrosel items={items} />}
         </CardBody>
       </Card>
 

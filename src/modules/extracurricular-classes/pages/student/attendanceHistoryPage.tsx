@@ -1,14 +1,26 @@
-import React, { FC } from 'react';
-import ModuleTabs from '../../components/common/moduleTabs';
-import BackButton from '../../components/common/backButton';
+import { FC } from "react";
+import ModuleTabs from "../../components/common/moduleTabs";
+import BackButton from "../../components/common/backButton";
 
 const AttendanceHistoryPage: FC = () => {
-  const userRole = 'student';
+  const userRole = "student";
 
   const studentTabs = [
-    { label: 'Mis clases inscritas', path: '/modules/extracurricular/estudiante/clases-inscritas', roles: ['student'] },
-    { label: 'Clases disponibles', path: '/modules/extracurricular/estudiante/clases-disponibles', roles: ['student'] },
-    { label: 'Historial de asistencia', path: '/modules/extracurricular/historial-asistencia', roles: ['student'] },
+    {
+      label: "Mis clases inscritas",
+      path: "/modules/extracurricular/estudiante/clases-inscritas",
+      roles: ["student"],
+    },
+    {
+      label: "Clases disponibles",
+      path: "/modules/extracurricular/estudiante/clases-disponibles",
+      roles: ["student"],
+    },
+    {
+      label: "Historial de asistencia",
+      path: "/modules/extracurricular/historial-asistencia",
+      roles: ["student"],
+    },
   ];
 
   return (
@@ -18,7 +30,9 @@ const AttendanceHistoryPage: FC = () => {
         <div className="mr-4">
           <BackButton />
         </div>
-        <h1 className="text-2xl font-bold text-gray-800">Historial de Asistencia </h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Historial de Asistencia{" "}
+        </h1>
       </div>
 
       {/* Tabs principales */}
@@ -28,7 +42,6 @@ const AttendanceHistoryPage: FC = () => {
         <h2 className="text-xl font-bold mb-4">Contenido...</h2>
       </div>
     </div>
-    
   );
 };
 

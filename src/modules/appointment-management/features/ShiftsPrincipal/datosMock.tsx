@@ -1,25 +1,31 @@
 import { Shift } from "../../../appointment-management/models/shift";
 import { User } from "../../../appointment-management/models/User";
+import { CarroselItem } from "../../types/carroselType";
 
-export const carroselItems: {
-  type: "image" | "video";
-  title: string;
-  duration: number;
-  url: string;
-}[] = [
+export const carroselItems: CarroselItem[] = [
   {
+    id: 1,
     type: "image",
     title: "Programa de bienestar",
     duration: 4,
     url: "https://cdn.pixabay.com/photo/2020/10/02/09/01/tablets-5620566_1280.jpg",
   },
   {
+    id: 2,
+    type: "image",
+    title: "Programa de bienestar",
+    duration: 4,
+    url: "https://cdn.pixabay.com/photo/2020/10/02/09/01/tablets-5620566_1280.jpg",
+  },
+  {
+    id: 3,
     type: "image",
     title: "Programa de salud mental",
     duration: 3,
     url: "https://cdn.pixabay.com/photo/2017/10/07/14/55/depression-2826711_1280.jpg",
   },
   {
+    id: 4,
     type: "image",
     title: "Programa de odontología",
     duration: 4,
@@ -69,8 +75,6 @@ export const shiftItems: Shift[] = [
     UserId: "user-004",
   },
 ];
-
-
 
 export const users: User[] = [
   {

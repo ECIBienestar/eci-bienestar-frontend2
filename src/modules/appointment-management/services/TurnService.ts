@@ -1,4 +1,4 @@
-import apiClient from "@/common/services/apiClient";
+import healthApiClient from "./healthApiClient";
 import {
   ApiResponse,
   TurnResponse,
@@ -11,8 +11,8 @@ export const createTurn = async (
   data: CreateTurnRequest
 ): Promise<ApiResponse<TurnResponse>> => {
   try {
-    const response = await apiClient.post<ApiResponse<TurnResponse>>(
-      "/medical-turns/turns",
+    const response = await healthApiClient.post<ApiResponse<TurnResponse>>(
+      "/turns",
       data
     );
     return response.data;
@@ -24,8 +24,8 @@ export const createTurn = async (
 
 export const getTurns = async (): Promise<ApiResponse<TurnResponse[]>> => {
   try {
-    const response = await apiClient.get<ApiResponse<TurnResponse[]>>(
-      "/medical-turns/turns"
+    const response = await healthApiClient.get<ApiResponse<TurnResponse[]>>(
+      "/turns"
     );
     return response.data;
   } catch (error) {
@@ -38,8 +38,8 @@ export const getTurnsBySpeciality = async (
   speciality: SpecialityEnum
 ): Promise<ApiResponse<TurnResponse[]>> => {
   try {
-    const response = await apiClient.get<ApiResponse<TurnResponse[]>>(
-      `/medical-turns/turns/${speciality}`
+    const response = await healthApiClient.get<ApiResponse<TurnResponse[]>>(
+      `/turns/${speciality}`
     );
     return response.data;
   } catch (error) {
@@ -50,8 +50,8 @@ export const getTurnsBySpeciality = async (
 
 export const getCurrentTurn = async (): Promise<ApiResponse<TurnResponse>> => {
   try {
-    const response = await apiClient.get<ApiResponse<TurnResponse>>(
-      `/medical-turns/turns/current-turn`
+    const response = await healthApiClient.get<ApiResponse<TurnResponse>>(
+      `/turns/current-turn`
     );
     return response.data;
   } catch (error) {
@@ -64,8 +64,8 @@ export const getCurrentTurnBySpeciality = async (
   speciality: SpecialityEnum
 ): Promise<ApiResponse<TurnResponse>> => {
   try {
-    const response = await apiClient.get<ApiResponse<TurnResponse>>(
-      `/medical-turns/turns/current-turn/${speciality}`
+    const response = await healthApiClient.get<ApiResponse<TurnResponse>>(
+      `/turns/current-turn/${speciality}`
     );
     return response.data;
   } catch (error) {
@@ -78,8 +78,8 @@ export const callNextTurn = async (
   data: CallTurnRequest
 ): Promise<ApiResponse<TurnResponse>> => {
   try {
-    const response = await apiClient.post<ApiResponse<TurnResponse>>(
-      "/medical-turns/turns/call-next",
+    const response = await healthApiClient.post<ApiResponse<TurnResponse>>(
+      "/turns/call-next",
       data
     );
     return response.data;
@@ -93,8 +93,8 @@ export const callTurn = async (
   data: CallTurnRequest
 ): Promise<ApiResponse<TurnResponse>> => {
   try {
-    const response = await apiClient.post<ApiResponse<TurnResponse>>(
-      "/medical-turns/turns/call",
+    const response = await healthApiClient.post<ApiResponse<TurnResponse>>(
+      "/turns/call",
       data
     );
     return response.data;
@@ -108,8 +108,8 @@ export const skipTurn = async (
   speciality: SpecialityEnum
 ): Promise<ApiResponse<void>> => {
   try {
-    const response = await apiClient.post<ApiResponse<void>>(
-      `/medical-turns/turns/skip?speciality=${speciality}`
+    const response = await healthApiClient.post<ApiResponse<void>>(
+      `/turns/skip?speciality=${speciality}`
     );
     return response.data;
   } catch (error) {
@@ -120,8 +120,8 @@ export const skipTurn = async (
 
 export const turnsEnabled = async (): Promise<ApiResponse<boolean>> => {
   try {
-    const response = await apiClient.get<ApiResponse<boolean>>(
-      "/medical-turns/turns/are-enabled"
+    const response = await healthApiClient.get<ApiResponse<boolean>>(
+      "/turns/are-enabled"
     );
     return response.data;
   } catch (error) {
@@ -134,8 +134,8 @@ export const turnsDisabledBySpeciality = async (): Promise<
   ApiResponse<SpecialityEnum[]>
 > => {
   try {
-    const response = await apiClient.get<ApiResponse<SpecialityEnum[]>>(
-      "/medical-turns/turns/specialties-disabled"
+    const response = await healthApiClient.get<ApiResponse<SpecialityEnum[]>>(
+      "/turns/specialties-disabled"
     );
     return response.data;
   } catch (error) {
@@ -148,8 +148,8 @@ export const toggleTurns = async (
   action: "enable" | "disable"
 ): Promise<ApiResponse<void>> => {
   try {
-    const response = await apiClient.post<ApiResponse<void>>(
-      `/medical-turns/turns/${action}`
+    const response = await healthApiClient.post<ApiResponse<void>>(
+      `/turns/${action}`
     );
     return response.data;
   } catch (error) {
@@ -166,8 +166,8 @@ export const toggleTurnsBySpeciality = async (
   speciality: SpecialityEnum
 ): Promise<ApiResponse<void>> => {
   try {
-    const response = await apiClient.post<ApiResponse<void>>(
-      `/medical-turns/turns/${action}/${speciality}`
+    const response = await healthApiClient.post<ApiResponse<void>>(
+      `/turns/${action}/${speciality}`
     );
     return response.data;
   } catch (error) {

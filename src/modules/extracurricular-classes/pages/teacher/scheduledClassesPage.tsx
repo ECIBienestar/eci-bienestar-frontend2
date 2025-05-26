@@ -1,13 +1,21 @@
-import React, { FC } from 'react';
-import ModuleTabs from '../../components/common/moduleTabs';
-import BackButton from '../../components/common/backButton';
+import { FC } from "react";
+import ModuleTabs from "../../components/common/moduleTabs";
+import BackButton from "../../components/common/backButton";
 
 const ScheduledClassesPage: FC = () => {
-  const userRole = 'teacher';
+  const userRole = "teacher";
 
   const teacherTabs = [
-    { label: 'Mis clases programadas', path: '/modules/extracurricular/profesor/clases-programadas', roles: ['teacher'] },
-    { label: 'Registro de asistencia', path: '/modules/extracurricular/profesor/registro-de-asistencia', roles: ['teacher'] }
+    {
+      label: "Mis clases programadas",
+      path: "/modules/extracurricular/profesor/clases-programadas",
+      roles: ["teacher"],
+    },
+    {
+      label: "Registro de asistencia",
+      path: "/modules/extracurricular/profesor/registro-de-asistencia",
+      roles: ["teacher"],
+    },
   ];
 
   return (
@@ -17,12 +25,14 @@ const ScheduledClassesPage: FC = () => {
         <div className="mr-4">
           <BackButton />
         </div>
-        <h1 className="text-2xl font-bold text-gray-800">Mis clases programadas </h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Mis clases programadas{" "}
+        </h1>
       </div>
 
       {/* Tabs principales */}
       <ModuleTabs tabs={teacherTabs} userRole={userRole} />
-      
+
       <div className="bg-white rounded-b-lg rounded-tr-lg shadow p-6 border-t-0 border-2 border-gray-200">
         <h2 className="text-xl font-bold mb-4">contenido ...</h2>
       </div>

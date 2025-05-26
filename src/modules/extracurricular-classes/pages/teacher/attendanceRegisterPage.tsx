@@ -1,13 +1,21 @@
-import React, { FC } from 'react';
-import ModuleTabs from '../../components/common/moduleTabs';
-import BackButton from '../../components/common/backButton';
+import { FC } from "react";
+import ModuleTabs from "../../components/common/moduleTabs";
+import BackButton from "../../components/common/backButton";
 
 const AttendanceRegisterPage: FC = () => {
-  const userRole = 'teacher';
+  const userRole = "teacher";
 
   const teacherTabs = [
-    { label: 'Mis clases programadas', path: '/modules/extracurricular/profesor/clases-programadas', roles: ['teacher'] },
-    { label: 'Registro de asistencia', path: '/modules/extracurricular/profesor/registro-de-asistencia', roles: ['teacher'] }
+    {
+      label: "Mis clases programadas",
+      path: "/modules/extracurricular/profesor/clases-programadas",
+      roles: ["teacher"],
+    },
+    {
+      label: "Registro de asistencia",
+      path: "/modules/extracurricular/profesor/registro-de-asistencia",
+      roles: ["teacher"],
+    },
   ];
 
   return (
@@ -17,7 +25,9 @@ const AttendanceRegisterPage: FC = () => {
         <div className="mr-4">
           <BackButton />
         </div>
-        <h1 className="text-2xl font-bold text-gray-800">Registro de asistencia </h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Registro de asistencia{" "}
+        </h1>
       </div>
 
       {/* Tabs principales */}

@@ -1,4 +1,5 @@
 type CarroselItem = {
+  id: number;
   type: "image" | "video";
   title: string;
   duration: number;

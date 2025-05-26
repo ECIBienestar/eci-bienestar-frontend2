@@ -1,73 +1,81 @@
-import React, { FC, useState } from 'react';
-import ModuleTabs from '../../components/common/moduleTabs';
-import BackButton from '../../components/common/backButton';
-import AddClassModal from '../../components/modals/addClassModal';
-import EditClassModal from '../../components/modals/editClassModal';
-import ClassManagementList from '../../components/common/classManagementList';
-import { useAllClasses, useDeleteClass } from '../../hooks/useClasses';
-import { Class } from '../../services/classesService';
+import { FC, useState } from "react";
+import ModuleTabs from "../../components/common/moduleTabs";
+import BackButton from "../../components/common/backButton";
+import AddClassModal from "../../components/modals/addClassModal";
+import EditClassModal from "../../components/modals/editClassModal";
+import ClassManagementList from "../../components/common/classManagementList";
+import { useAllClasses, useDeleteClass } from "../../hooks/useClasses";
+import { Class } from "../../services/classesService";
 
 const ClassManagementPage: FC = () => {
-  const userRole = 'admin';
+  const userRole = "admin";
   const { classes, loading, error, refresh } = useAllClasses();
   const { deleteExistingClass, loading: deleteLoading } = useDeleteClass();
-  
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState<Class | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const classesPerPage = 6; 
-  
+  const classesPerPage = 6;
+
   const allTabs = [
-    { label: 'Estadísticas', path: '/modules/extracurricular/estadisticas', roles: ['wellnessStaff', 'admin'] },
-    { label: 'Gestión de clases', path: '/modules/extracurricular/gestion-de-clases', roles: ['wellnessStaff', 'admin'] },
-    { label: 'Gestión de notificaciones', path: '/modules/extracurricular/gestion-de-notificaciones', roles: ['admin'] },
+    {
+      label: "Estadísticas",
+      path: "/modules/extracurricular/estadisticas",
+      roles: ["wellnessStaff", "admin"],
+    },
+    {
+      label: "Gestión de clases",
+      path: "/modules/extracurricular/gestion-de-clases",
+      roles: ["wellnessStaff", "admin"],
+    },
+    {
+      label: "Gestión de notificaciones",
+      path: "/modules/extracurricular/gestion-de-notificaciones",
+      roles: ["admin"],
+    },
   ];
-  
-  const tabs = allTabs.filter(tab => tab.roles.includes(userRole));
-  
+
+  const tabs = allTabs.filter((tab) => tab.roles.includes(userRole));
+
   const handleOpenEditModal = (classItem: Class) => {
     setSelectedClass(classItem);
     setIsEditModalOpen(true);
   };
-  
+
   const handleDelete = async (id: string) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar esta clase?')) {
+    if (window.confirm("¿Estás seguro de que deseas eliminar esta clase?")) {
       const success = await deleteExistingClass(id);
       if (success) {
         refresh();
       }
     }
   };
-  
+
   // Pagination - Usando 6 clases por página
   const indexOfLastClass = currentPage * classesPerPage;
   const indexOfFirstClass = indexOfLastClass - classesPerPage;
   const currentClasses = classes.slice(indexOfFirstClass, indexOfLastClass);
   const totalPages = Math.ceil(classes.length / classesPerPage);
-  
+
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-  
+
   const formatTime = (time: string) => {
-    if (!time) return '';
-    
+    if (!time) return "";
+
     try {
-      const [hours, minutes] = time.split(':');
+      const [hours, minutes] = time.split(":");
       const h = parseInt(hours);
       const m = minutes;
-      const period = h >= 12 ? 'pm' : 'am';
+      const period = h >= 12 ? "pm" : "am";
       const hour = h % 12 || 12;
-      
+
       return `${hour}:${m} ${period}`;
     } catch (error) {
       return time;
     }
   };
-  
-  const formatCapacity = (current: number, max: number) => {
-    return `${current}/${max}`;
-  };
-  
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-6">
       {/* Encabezado */}
@@ -77,12 +85,12 @@ const ClassManagementPage: FC = () => {
         </div>
         <h1 className="text-2xl font-bold text-gray-800">Gestión de clases</h1>
       </div>
-      
+
       {/* Tabs principales */}
       <div className="mb-[-1px]">
         <ModuleTabs tabs={tabs} userRole={userRole} />
       </div>
-      
+
       {/* Contenido principal */}
       <div className="bg-white rounded-b-lg rounded-tr-lg shadow p-6 border-t-0 border-2 border-gray-200">
         <div className="flex justify-between items-center mb-6">
@@ -94,7 +102,7 @@ const ClassManagementPage: FC = () => {
             Agregar Clase
           </button>
         </div>
-        
+
         {loading ? (
           <div className="flex justify-center py-8">
             <p>Cargando clases...</p>
@@ -111,14 +119,13 @@ const ClassManagementPage: FC = () => {
             totalPages={totalPages}
             deleteLoading={deleteLoading}
             formatTime={formatTime}
-            formatCapacity={formatCapacity}
             handleOpenEditModal={handleOpenEditModal}
             handleDelete={handleDelete}
             paginate={paginate}
           />
         )}
       </div>
-      
+
       {/* Modales */}
       <AddClassModal
         isOpen={isAddModalOpen}
@@ -128,7 +135,7 @@ const ClassManagementPage: FC = () => {
           setIsAddModalOpen(false);
         }}
       />
-      
+
       <EditClassModal
         isOpen={isEditModalOpen}
         onClose={() => {

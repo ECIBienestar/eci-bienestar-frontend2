@@ -3,17 +3,15 @@ import { Button } from "@heroui/react";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
-
-import StadisticsShifts from "../../components/StadisticsShifts/StadisticsShifts";
 import {
-  datosPorEspecialidad,
-  datosPorRol,
-  datosPorFecha,
-  datosPorEstado,
-} from "./mockData";
+  getTurnCountBySpeciality,
+  getTurnCountByRole,
+} from "@modules/appointment-management/services/stadistic";
+import StadisticsShifts from "../../components/StadisticsShifts/StadisticsShifts";
 
 const Stadistics = () => {
   const navigate = useNavigate();
+
   const [especialidades, setEspecialidades] = useState<string[]>([]);
   const [rolesPaciente, setRolesPaciente] = useState<string[]>([]);
   const [rangosFecha, setRangosFecha] = useState<string[]>([]);
@@ -22,7 +20,7 @@ const Stadistics = () => {
   const [selectedEspecialidad, setSelectedEspecialidad] =
     useState<string>("Todos");
   const [selectedRol, setSelectedRol] = useState<string>("Todos");
-  const [selectedFecha, setSelectedFecha] = useState<string>("Todo el tiempo");
+  const [selectedFecha, setSelectedFecha] = useState<string>("Todos");
   const [selectedEstado, setSelectedEstado] = useState<string>("Todos");
 
   const [turnAttended, setTurnAttended] = useState<number>(0);
@@ -60,7 +58,7 @@ const Stadistics = () => {
     "Servicios generales",
   ];
   const fetchRangosFecha = async () => [
-    "Todo el tiempo",
+    "Todos",
     "Última semana",
     "Último mes",
     "Último año",
@@ -72,80 +70,176 @@ const Stadistics = () => {
     "Actual",
     "Terminado",
   ];
-  useEffect(() => {
-    let base = 0;
-    const datosGraficoTemp: { name: string; value: number }[] = [];
 
-    const especialidadTodos = selectedEspecialidad === "Todos";
-    const rolTodos = selectedRol === "Todos";
-    const fechaTodos = selectedFecha === "Todo el tiempo";
-    const estadoTodos = selectedEstado === "Todos";
+  const especialidadMap: Record<string, string> = {
+  "Medicina General": "GENERAL_MEDICINE",
+  "Odontologia": "DENTISTRY",
+  "Psicologia": "PSYCHOLOGY",
+};
 
-    // Solo un "Todos" activo permite mostrar pie chart
-    const isPieChartActive =
-      especialidadTodos || rolTodos || fechaTodos || estadoTodos;
+const rolMap: Record<string, string> = {
+  "Estudiante": "STUDENT",
+  "Docente": "TEACHER",
+  "Administrativo": "ADMINISTRATOR",
+  "Servicios generales": "GENERAL_SERVICES",
+};
 
-    // Calcular datos en base al único "Todos" activo
-    if (especialidadTodos) {
-      Object.entries(datosPorEspecialidad).forEach(([name, value]) => {
-        datosGraficoTemp.push({ name, value });
-        base += value;
-      });
-    } else if (rolTodos) {
-      Object.entries(datosPorRol).forEach(([name, value]) => {
-        datosGraficoTemp.push({ name, value });
-        base += value;
-      });
-    } else if (fechaTodos) {
-      Object.entries(datosPorFecha).forEach(([name, value]) => {
-        datosGraficoTemp.push({ name, value });
-        base += value;
-      });
-    } else if (estadoTodos) {
-      Object.entries(datosPorEstado).forEach(([name, value]) => {
-        datosGraficoTemp.push({ name, value });
-        base += value;
-      });
-    } else {
-      // Si ningún "Todos" está activo, gráfico se vacía
-      if (selectedEspecialidad && selectedEspecialidad !== "Todos") {
-        base = datosPorEspecialidad[selectedEspecialidad] || 0;
-      } else if (selectedRol && selectedRol !== "Todos") {
-        base = datosPorRol[selectedRol] || 0;
-      } else if (selectedFecha && selectedFecha !== "Todo el tiempo") {
-        base = datosPorFecha[selectedFecha] || 0;
-      } else if (selectedEstado && selectedEstado !== "Todos") {
-        base = datosPorEstado[selectedEstado] || 0;
-      }
+  const getDateRange = (label: string): { start: string; end: string } => {
+    const now = new Date();
+    let start: Date;
+
+    switch (label) {
+      case "Última semana":
+        start = new Date();
+        start.setDate(now.getDate() - 7);
+        break;
+      case "Último mes":
+        start = new Date();
+        start.setMonth(now.getMonth() - 1);
+        break;
+      case "Último año":
+        start = new Date();
+        start.setFullYear(now.getFullYear() - 1);
+        break;
+      default:
+        start = new Date(2000, 0, 1);
     }
 
-    setTurnAttended(base);
-    setTurnUnAttended(Math.floor(base * 0.4));
-    setDatosGrafico(isPieChartActive ? datosGraficoTemp : []);
+    return {
+      start: start.toISOString().split("T")[0],
+      end: now.toISOString().split("T")[0],
+    };
+  };
 
-    // Especialidades (sin "Todos")
-    const especialidadArray = especialidades
-      .filter((esp) => esp !== "Todos")
-      .map((esp) =>
-        selectedEspecialidad === "Todos"
-          ? datosPorEspecialidad[esp] || 0
-          : esp === selectedEspecialidad
-          ? datosPorEspecialidad[esp] || 0
-          : 0
-      );
-    setAttendedBySpeciality(especialidadArray);
+  useEffect(() => {
+    if (especialidades.length === 0 || rolesPaciente.length === 0) return;
+    const fetchEstadisticas = async () => {
+      const { start, end } = getDateRange(selectedFecha);
 
-    // Roles (sin "Todos")
-    const rolesArray = rolesPaciente
-      .filter((rol) => rol !== "Todos")
-      .map((rol) =>
-        selectedRol === "Todos"
-          ? datosPorRol[rol] || 0
-          : rol === selectedRol
-          ? datosPorRol[rol] || 0
-          : 0
-      );
-    setAttendedByRol(rolesArray);
+      try {
+        // Traduce filtros
+        const apiEspecialidad =
+          selectedEspecialidad !== "Todos"
+            ? especialidadMap[selectedEspecialidad]
+            : undefined;
+        const apiRol =
+          selectedRol !== "Todos" ? rolMap[selectedRol] : undefined;
+        const apiEstado =
+          selectedEstado !== "Todos" ? selectedEstado.toUpperCase() : undefined;
+
+        // Por especialidad
+        const specialityData = await getTurnCountBySpeciality(
+          start,
+          end,
+          apiEspecialidad,
+          apiEstado
+        );
+
+        const especialidadArray = especialidades
+          .filter((esp) => esp !== "Todos")
+          .map((esp) => {
+            const apiValue = especialidadMap[esp];
+            const found = specialityData.data.find(
+              (d) => d.speciality === apiValue
+            );
+            return found?.count || 0;
+          });
+        setAttendedBySpeciality(especialidadArray);
+
+        // Por rol
+        const rolData = await getTurnCountByRole(start, end, apiRol, apiEstado);
+        const rolesArray = rolesPaciente
+          .filter((rol) => rol !== "Todos")
+          .map((rol) => {
+            const apiValue = rolMap[rol];
+            const found = rolData.data.find((d) => d.role === apiValue);
+            return found?.count || 0;
+          });
+        setAttendedByRol(rolesArray);
+
+        // Turnos atendidos (COMPLETED)
+        const attendedData = await getTurnCountByRole(
+          start,
+          end,
+          undefined,
+          "COMPLETED"
+        );
+        const attendedTotal = attendedData.data.reduce(
+          (acc, curr) => acc + curr.count,
+          0
+        );
+        setTurnAttended(attendedTotal);
+
+        // Turnos no atendidos (otros estados)
+        const unAttendedStatuses = ["PENDING", "CURRENT", "FINISHED"];
+        let unAttendedTotal = 0;
+        for (const status of unAttendedStatuses) {
+          const response = await getTurnCountByRole(
+            start,
+            end,
+            undefined,
+            status
+          );
+          unAttendedTotal += response.data.reduce(
+            (acc, curr) => acc + curr.count,
+            0
+          );
+        }
+        setTurnUnAttended(unAttendedTotal);
+
+        // Datos para gráfico
+        const datosGraficoTemp: { name: string; value: number }[] = [];
+
+        const isEstadoFilterOnly =
+          selectedEstado !== "Todos" &&
+          selectedEspecialidad === "Todos" &&
+          selectedRol === "Todos";
+
+        if (isEstadoFilterOnly) {
+          const statusLabels = {
+            PENDING: "Pendiente",
+            COMPLETED: "Completado",
+            CURRENT: "Actual",
+            FINISHED: "Terminado",
+          } as const;
+
+          type StatusKey = keyof typeof statusLabels;
+          const statuses: StatusKey[] = [
+            "PENDING",
+            "COMPLETED",
+            "CURRENT",
+            "FINISHED",
+          ];
+          for (const status of statuses) {
+            const response = await getTurnCountByRole(
+              start,
+              end,
+              undefined,
+              status
+            );
+            const total = response.data.reduce(
+              (acc, curr) => acc + curr.count,
+              0
+            );
+            datosGraficoTemp.push({ name: statusLabels[status], value: total });
+          }
+        } else if (selectedEspecialidad === "Todos") {
+          specialityData.data.forEach(({ speciality, count }) => {
+            datosGraficoTemp.push({ name: speciality, value: count });
+          });
+        } else if (selectedRol === "Todos") {
+          rolData.data.forEach(({ role, count }) => {
+            datosGraficoTemp.push({ name: role, value: count });
+          });
+        }
+
+        setDatosGrafico(datosGraficoTemp);
+      } catch (error) {
+        console.error("Error obteniendo estadísticas reales:", error);
+      }
+    };
+
+    fetchEstadisticas();
   }, [
     selectedEspecialidad,
     selectedRol,
@@ -162,7 +256,7 @@ const Stadistics = () => {
         <Button
           className="bg-health-primary text-white px-4 py-2"
           type="button"
-          onPress={() => navigate(-1)}
+          onClick={() => navigate(-1)}
         >
           <FontAwesomeIcon icon={faArrowLeft} size="lg" color="white" /> Volver
         </Button>

@@ -42,7 +42,11 @@ function HealthRoutes() {
         path="/statistics"
         element={
           <ProtectedRoute
-            allowedRoles={[Role.MEDICAL_SECRETARY, Role.MEDICAL_STAFF]}
+            allowedRoles={[
+              Role.MEDICAL_SECRETARY,
+              Role.MEDICAL_STAFF,
+              Role.ADMINISTRATOR,
+            ]}
           >
             <Stadistics />
           </ProtectedRoute>

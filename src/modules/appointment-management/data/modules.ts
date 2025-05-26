@@ -23,10 +23,6 @@ export const adminItems: ModuleItemType[] = [
       "Observe los turnos en espera y gestione el contenido informativo",
     linkTo: "/modules/health/home",
   },
-];
-
-export const secretaryItems: ModuleItemType[] = [
-  ...adminItems,
   {
     id: "statistics",
     icon: ["fas", "chart-simple"],

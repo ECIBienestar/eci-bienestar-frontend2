@@ -2,4 +2,4 @@ export { default as hookGestionMultimediaPanel } from "./hookGestionMultimediaPa
 export { default as hookCarrosel } from "./hookCarrosel";
 export * from "./useTurns";
 export * from "./useUsers";
-export * from "./useGestionShiftPanel";
+export * from "./useMultimedia";

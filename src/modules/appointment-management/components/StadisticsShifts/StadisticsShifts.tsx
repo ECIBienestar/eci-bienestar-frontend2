@@ -19,7 +19,7 @@ type Props = {
   turnUnAttended: number;
   attendedBySpeciality: number[];
   attendedByRol: number[];
-  datosGrafico: { name: string; value: number }[]
+  datosGrafico: { name: string; value: number }[];
 };
 
 const StadisticsShifts = ({
@@ -42,29 +42,52 @@ const StadisticsShifts = ({
   datosGrafico,
 }: Props) => {
   return (
-    <div className="drop-shadow-xl bg-white h-[80vh] flex flex-col justify-between p-4">
+    <div className="drop-shadow-xl bg-white min-h-[80vh] flex flex-col justify-between p-4">
       <div>
         <h2 className="text-2xl font-bold">Reportes de atención</h2>
         <p>Genere informes detallados sobre el nivel de atención brindado</p>
       </div>
 
-      <section className="flex flex-row gap-6 w-full">
-        <FilterSelect label="Especialidad" options={especialidades} value={selectedEspecialidad} onChange={setSelectedEspecialidad} />
-        <FilterSelect label="Rol paciente" options={rolesPaciente} value={selectedRol} onChange={setSelectedRol} />
-        <FilterSelect label="Rango fechas" options={rangosFecha} value={selectedFecha} onChange={setSelectedFecha} />
-        <FilterSelect label="Estado de los turnos" options={estadosTurno} value={selectedEstado} onChange={setSelectedEstado} />
+      <section className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full mt-4">
+        <FilterSelect
+          label="Especialidad"
+          options={especialidades}
+          value={selectedEspecialidad}
+          onChange={setSelectedEspecialidad}
+        />
+        <FilterSelect
+          label="Rol paciente"
+          options={rolesPaciente}
+          value={selectedRol}
+          onChange={setSelectedRol}
+        />
+        <FilterSelect
+          label="Rango fechas"
+          options={rangosFecha}
+          value={selectedFecha}
+          onChange={setSelectedFecha}
+        />
+        <FilterSelect
+          label="Estado turnos"
+          options={estadosTurno}
+          value={selectedEstado}
+          onChange={setSelectedEstado}
+        />
       </section>
 
-      <section className="flex flex-row justify-between gap-4 h-full mt-4">
-        <div className="flex-1">
+      <section className="flex flex-col lg:flex-row justify-between gap-6 h-full mt-6">
+        {/* Aquí el cambio está en usar flex-col en base a <1024px (lg) */}
+        <div className="flex-1 w-full lg:max-w-[48%]">
           <DatosStadistics
             turnAttended={turnAttended}
             turnUnAttended={turnUnAttended}
             attendedBySpeciality={attendedBySpeciality}
             attendedByRol={attendedByRol}
+            specialityLabels={especialidades.filter((e) => e !== "Todos")}
+            rolLabels={rolesPaciente.filter((r) => r !== "Todos")}
           />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 w-full lg:max-w-[48%] mt-6 lg:mt-0">
           <GraphicShift data={datosGrafico} title="Turnos" />
         </div>
       </section>

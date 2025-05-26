@@ -1,7 +1,6 @@
 import InstitutionalInfo from "./institutionalInfo";
 import ShiftActual from "./shiftActual";
 import ShiftsList from "./shiftsList";
-import type { CarroselProps } from "../../../appointment-management/types/carroselType";
 import { TurnResponse } from "../../types/dto";
 import { useCurrentTurn } from "../../hooks";
 import {
@@ -11,11 +10,7 @@ import {
 } from "@modules/appointment-management/components/common";
 import NoShifts from "./NoShifts";
 
-type Props = {
-  carroselItems: CarroselProps["items"];
-};
-
-const ShiftsUser = ({ carroselItems }: Props) => {
+const ShiftsUser = () => {
   const { data, isLoading, error } = useCurrentTurn();
 
   const turn: TurnResponse | undefined = data?.data;
@@ -45,7 +40,7 @@ const ShiftsUser = ({ carroselItems }: Props) => {
               </div>
             )}
           </ShiftActual>
-          <InstitutionalInfo items={carroselItems} />
+          <InstitutionalInfo />
         </div>
       </div>
     </div>

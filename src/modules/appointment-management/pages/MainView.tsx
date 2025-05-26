@@ -1,11 +1,7 @@
 import { Card, CardBody, CardFooter, CardHeader, Image } from "@heroui/react";
 import image from "@/assets/images/appointment-management.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  adminItems,
-  doctorItems,
-  secretaryItems,
-} from "@modules/appointment-management/data";
+import { adminItems, doctorItems } from "@modules/appointment-management/data";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/common/context";
 import { Role } from "@/common/types";
@@ -22,7 +18,7 @@ function MainView() {
       items = adminItems;
       break;
     case Role.MEDICAL_SECRETARY:
-      items = secretaryItems;
+      items = adminItems;
       break;
     case Role.MEDICAL_STAFF:
       items = doctorItems;
