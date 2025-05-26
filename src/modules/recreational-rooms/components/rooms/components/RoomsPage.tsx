@@ -16,9 +16,8 @@ import type React from "react";
 import { Fragment, useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { HallEntity } from "../types/RoomTypes";
-import { Room } from "../types/RoomTypes.ts";
 import { hallsApi } from "../services/RoomService";
+import type { HallEntity, Room } from "../types";
 
 const RoomsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -40,7 +39,7 @@ const RoomsPage: React.FC = () => {
     description: "",
     isAvailable: true,
     openingHours: "08:00",
-    closingHours: "20:00",
+    closingHours: "19:00",
     features: [],
   });
   const [newFeature, setNewFeature] = useState("");
@@ -60,7 +59,7 @@ const RoomsPage: React.FC = () => {
           description: hall.description,
           isAvailable: hall.status === "A",
           openingHours: "08:00",
-          closingHours: "20:00",
+          closingHours: "19:00",
           features: hall.description.includes(",")
             ? hall.description.split(",").map((f) => f.trim())
             : [],
@@ -144,7 +143,7 @@ const RoomsPage: React.FC = () => {
           description: "",
           isAvailable: true,
           openingHours: "08:00",
-          closingHours: "20:00",
+          closingHours: "19:00",
           features: [],
         });
         setError(null);
@@ -158,7 +157,7 @@ const RoomsPage: React.FC = () => {
           description: hall.description,
           isAvailable: hall.status === "A",
           openingHours: "08:00",
-          closingHours: "20:00",
+          closingHours: "19:00",
           features: hall.description.includes(",")
             ? hall.description.split(",").map((f) => f.trim())
             : [],
@@ -252,7 +251,7 @@ const RoomsPage: React.FC = () => {
           description: "",
           isAvailable: true,
           openingHours: "08:00",
-          closingHours: "20:00",
+          closingHours: "19:00",
           features: [],
         });
         setSelectedRoom(null);
@@ -315,7 +314,7 @@ const RoomsPage: React.FC = () => {
       description: "",
       isAvailable: true,
       openingHours: "08:00",
-      closingHours: "20:00",
+      closingHours: "19:00",
       features: [],
     });
     setSelectedRoom(null);

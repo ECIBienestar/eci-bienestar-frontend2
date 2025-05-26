@@ -1,21 +1,17 @@
+
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 
 import Dashboard from "./common/dashboard";
 import Layout from "./common/layout/layout";
 import ForgotPassword from "./modules/auth/components/ForgotPassword";
 
-// Recreational rooms
-import RoomActions from "./modules/recreational-rooms/components/RoomActions";
-import RoomsPage from "@modules/recreational-rooms/components/rooms/components/RoomsPage";
-import ReservationsPage from "./modules/recreational-rooms/components/ReservationsPage";
-import ItemsPage from "./modules/recreational-rooms/components/ItemsPage";
+// Importar rutas de módulos
+import RecreationalRoomsRoutes from "@modules/recreational-rooms/routes";
+import ExtracurricularClassesRoutes from "./modules/extracurricular-classes/routes";
 
-// Health & others
-import { HealthRoutes } from "@modules/appointment-management/routes";
 import { useAuth } from "./common/context";
 import { Role } from "./common/types";
 import { ProtectedRoute, Root } from "@common/components";
-import ExtracurricularClassesRoutes from "./modules/extracurricular-classes/routes";
 
 const MODULE_MAPPING = {
   health: "turnos",
@@ -104,24 +100,10 @@ function App() {
               activeModule={MODULE_MAPPING.recreation}
               onNotificationsClick={handleNotificationsClick}
             >
-              <div className="">
-                <div className="">
-                  <div className="bg-white rounded-lg shadow p-6 h-full">
-                    <Outlet />
-                  </div>
-                </div>
-              </div>
+              <RecreationalRoomsRoutes />
             </Layout>
           }
-        >
-          {/* Ruta principal del módulo */}
-          <Route index element={<RoomActions />} />
-
-          {/* Subrutas */}
-          <Route path="rooms" element={<RoomsPage />} />
-          <Route path="reservations" element={<ReservationsPage />} />
-          <Route path="items" element={<ItemsPage />} />
-        </Route>
+        />
 
         {/* Módulo de Clases Extracurriculares */}
         <Route

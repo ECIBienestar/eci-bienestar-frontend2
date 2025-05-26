@@ -3,15 +3,15 @@ import { Fragment, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, Transition } from "@headlessui/react";
 import {
-  EyeIcon,
-  PencilIcon,
-  TrashIcon,
-  XMarkIcon,
-  MapPinIcon,
-  ClipboardDocumentIcon,
-  SparklesIcon,
-  WrenchScrewdriverIcon,
-  CalendarIcon,
+	EyeIcon,
+	PencilIcon,
+	TrashIcon,
+	XMarkIcon,
+	MapPinIcon,
+	ClipboardDocumentIcon,
+	SparklesIcon,
+	WrenchScrewdriverIcon,
+	CalendarIcon,
 } from "@heroicons/react/24/outline";
 import toast, { Toaster } from "react-hot-toast";
 import {
@@ -69,12 +69,11 @@ const ItemsPage: React.FC = () => {
     location: "",
     description: "",
   });
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterCategory] = useState("");
-  const [filterStatus, setFilterStatus] = useState<string>("");
-  const [sortField, setSortField] = useState<string>("name");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+	const [searchQuery, setSearchQuery] = useState("");
+	const [filterCategory] = useState("");
+	const [filterStatus, setFilterStatus] = useState<string>("");
+	const [sortField, setSortField] = useState<string>("name");
+	const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
     const fetchData = async () => {

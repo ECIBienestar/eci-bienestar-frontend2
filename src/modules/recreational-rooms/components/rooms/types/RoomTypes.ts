@@ -1,3 +1,6 @@
+/**
+ * Represents a recreational room or hall in the system
+ */
 export interface Room {
     id: string;
     name: string;
@@ -10,6 +13,9 @@ export interface Room {
     features: string[];
 }
 
+/**
+ * Represents a hall in the system
+ */
 export interface HallEntity {
     id?: number;
     name: string;
@@ -18,6 +24,7 @@ export interface HallEntity {
     description: string;
     capacity: number;
 }
+
 
 export interface BookingRequestDTO {
     date: string;
