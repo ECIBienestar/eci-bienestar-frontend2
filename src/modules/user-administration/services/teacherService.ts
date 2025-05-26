@@ -1,5 +1,5 @@
 // src/services/teacherService.ts
-import apiClient from "../../../common/services/apiCliend";
+import apiClient from "../../../common/services/apiClient";
 import { API_USER_URL } from "../lib/config";
 
 /**
@@ -11,7 +11,7 @@ export interface TeacherFromApi {
   fullName: string;
   phone: string;
   email: string;
-  role: string;    // “TEACHER”
+  role: string; // “TEACHER”
   active: boolean;
 }
 
@@ -29,7 +29,7 @@ export interface TeacherFromApi {
  *   specialty?: "GENERAL_MEDICINE" | "DENTISTRY" | …
  * }
  *
- * Para un TEACHER, role siempre debe ser "TEACHER". 
+ * Para un TEACHER, role siempre debe ser "TEACHER".
  * Si tu backend no necesita “specialty” para un profesor, puedes omitirlo.
  */
 export interface TeacherPayload {
@@ -130,4 +130,3 @@ export async function deleteTeacher(
     headers: { Authorization: `Bearer ${token}` },
   });
 }
-

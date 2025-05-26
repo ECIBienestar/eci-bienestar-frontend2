@@ -1,5 +1,5 @@
 // src/services/studentService.ts
-import apiClient from "../../../common/services/apiCliend";
+import apiClient from "../../../common/services/apiClient";
 import { API_USER_URL } from "../lib/config";
 
 export interface EmergencyContactPayload {
@@ -53,7 +53,9 @@ export interface StudentFromApi {
  * Obtiene la lista completa de estudiantes desde GET /users-controll/students
  */
 export async function fetchAllStudents(): Promise<StudentFromApi[]> {
-  const resp = await apiClient.get<StudentFromApi[]>(`${API_USER_URL}/students`);
+  const resp = await apiClient.get<StudentFromApi[]>(
+    `${API_USER_URL}/students`
+  );
   return resp.data;
 }
 
@@ -61,7 +63,7 @@ export async function fetchAllStudents(): Promise<StudentFromApi[]> {
  * Crea un contacto de emergencia: POST /users-controll/emergency-contacts
  */
 export async function createEmergencyContact(
-  payload: EmergencyContactPayload,
+  payload: EmergencyContactPayload
 ): Promise<{ id: number }> {
   const resp = await apiClient.post<{ id: number }>(
     `${API_USER_URL}/emergency-contacts`,
@@ -74,7 +76,7 @@ export async function createEmergencyContact(
  * Crea un nuevo estudiante: POST /users-controll/students
  */
 export async function createStudent(
-  payload: StudentPayload,
+  payload: StudentPayload
 ): Promise<StudentFromApi> {
   const resp = await apiClient.post<StudentFromApi>(
     `${API_USER_URL}/students`,

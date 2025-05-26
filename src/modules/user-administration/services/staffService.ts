@@ -1,4 +1,4 @@
-import apiClient from "../../../common/services/apiCliend";
+import apiClient from "../../../common/services/apiClient";
 import { API_USER_URL } from "../lib/config";
 
 /**
@@ -98,13 +98,7 @@ export async function fetchMonitors(): Promise<StaffFromApi[]> {
  * Combina todos los roles de staff
  */
 export async function fetchAllStaff(): Promise<StaffFromApi[]> {
-  const [
-    general,
-    prefects,
-    trainers,
-    wellness,
-    monitors,
-  ] = await Promise.all([
+  const [general, prefects, trainers, wellness, monitors] = await Promise.all([
     fetchGeneralServicesStaff(),
     fetchPrefects(),
     fetchTrainers(),

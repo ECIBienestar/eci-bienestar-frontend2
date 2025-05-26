@@ -31,13 +31,6 @@ const LoginPage: React.FC = () => {
 
       {/* ──────── Lado formulario ──────── */}
       <div className="w-full md:w-1/2 bg-white flex flex-col items-center justify-center px-4 sm:px-6 md:px-8">
-        <div className="text-center mb-6 sm:mb-8">
-          <img src={logo} alt="Logo" className="mx-auto h-24 sm:h-32 md:h-40" />
-          <h2 className="mt-4 text-2xl sm:text-3xl md:text-4xl font-bold text-[#cf3a3a]">
-            Inicio de Sesión
-          </h2>
-        </div>
-
         <LoginForm />
 
         {/* ──────── Carrusel en móvil ──────── */}

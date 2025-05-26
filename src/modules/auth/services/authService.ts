@@ -1,5 +1,5 @@
 // src/services/authService.ts
-import apiClient from "../../../common/services/apiCliend";
+import apiClient from "../../../common/services/apiClient";
 import { API_AUTH_URL } from "../lib/config";
 
 export interface LoginResponse {
@@ -39,5 +39,7 @@ export async function requestPasswordReset(
   // );
 
   // Por ahora devolvemos un objeto con mensaje fijo:
-  return Promise.resolve({ message: "Si el correo existe, recibirás instrucciones." });
+  return Promise.resolve({
+    message: "Si el correo existe, recibirás instrucciones.",
+  });
 }

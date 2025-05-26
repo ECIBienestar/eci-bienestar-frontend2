@@ -1,5 +1,5 @@
 // src/services/doctorService.ts
-import apiClient from "../../../common/services/apiCliend";
+import apiClient from "../../../common/services/apiClient";
 import { API_USER_URL } from "../lib/config";
 
 /**
