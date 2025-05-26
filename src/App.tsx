@@ -1,187 +1,191 @@
-// @ts-ignore
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Dashboard from './common/dashboard';
-import Layout from './common/layout/layout';
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+
+import Dashboard from "./common/dashboard";
+import Layout from "./common/layout/layout";
+import ForgotPassword from "./modules/auth/components/ForgotPassword";
+
+// Importar rutas de módulos
+import RecreationalRoomsRoutes from "@modules/recreational-rooms/routes";
+import ExtracurricularClassesRoutes from "./modules/extracurricular-classes/routes";
+
+import { useAuth } from "./common/context";
+import { Role } from "./common/types";
+import { ProtectedRoute, Root } from "@common/components";
+import HealthRoutes from "./modules/appointment-management/routes/HealthRoutes";
 import SportsHome from './modules/sports-equipment/SportsRouter.tsx';
 
 const MODULE_MAPPING = {
-  health: 'turnos',
-  recreation: 'salas',
-  extracurricular: 'clases',
-  sports: 'prestamos',
-  gym: 'seguimiento',
-  users: 'usuarios',
-  statistics: 'estadisticas'
+  health: "turnos",
+  recreation: "salas",
+  extracurricular: "clases",
+  sports: "prestamos",
+  gym: "seguimiento",
+  users: "usuarios",
+  statistics: "estadisticas",
 };
 
-// Module colors
+// Module Colors
 const moduleColors = {
-  health: "#0078B4",      // Turnos de Salud
-  recreation: "#0E7029",  // Salas Recreativas
+  health: "#0078B4", // Turnos de Salud
+  recreation: "#0E7029", // Salas Recreativas
   extracurricular: "#362550", // Clases Extra
-  sports: "#5B1F00",      // Préstamos Deportivos
-  gym: "#000000",         // Gimnasio/Seguimiento
-  users: "#990000",       // Gestión Usuarios
-  statistics: "#990000",  // Estadísticas
-  default: "#990000"      // Color por defecto para dashboard
+  sports: "#5B1F00", // Préstamos Deportivos
+  gym: "#000000", // Gimnasio/Seguimiento
+  users: "#990000", // Gestión Usuarios
+  statistics: "#990000", // Estadísticas
+  default: "#990000", // Color por defecto para dashboard
 };
 
 // Componentes de módulos
-const ModuleTemplate: React.FC<{ title: string, color: string }> = ({ title}) => (
+const ModuleTemplate: React.FC<{ title: string }> = ({ title }) => (
   <div className="container mx-auto px-4 py-8">
     <h1 className="text-3xl font-bold text-gray-800 mb-6">{title}</h1>
     <div className="bg-white rounded-lg shadow p-6">
-      <p className="text-gray-600">Contenido del módulo {title} - En desarrollo</p>
+      <p className="text-gray-600">
+        Contenido del módulo {title} - En desarrollo
+      </p>
     </div>
   </div>
 );
 
 function App() {
-  const handleLogout = () => {
-    console.log('Cerrando sesión...');
-    // Aquí iría la lógica de logout
-  };
-
+  const { user } = useAuth();
   const handleNotificationsClick = () => {
-    console.log('Mostrando notificaciones...');
+    console.log("Mostrando notificaciones...");
     // Aquí iría la lógica para mostrar notificaciones
   };
 
   return (
-    <Router>
-      <Routes>
+    <Routes>
+      {/* Ruta inicial - login */}
+      <Route path="/" element={<Root />} />
+
+      {/* Restaurar contrasena*/}
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+
+      <Route element={<ProtectedRoute />}>
         {/* Ruta principal - Dashboard */}
-        <Route 
-          path="/" 
+        <Route
+          path="/home"
           element={
-            <Layout 
+            <Layout
               moduleColor={moduleColors.default}
               showSidebar={true}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
             >
               <Dashboard />
             </Layout>
-          } 
+          }
         />
-        
+
         {/* Módulo de Salud/Turnos */}
-        <Route 
-          path="/modules/health/*" 
+        <Route
+          path="/modules/health/*"
           element={
-            <Layout 
+            <Layout
               moduleColor={moduleColors.health}
               activeModule={MODULE_MAPPING.health}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
+              showSidebar={user?.role === Role.ADMINISTRATOR}
             >
-              <ModuleTemplate title="Gestión de Turnos de Salud" color={moduleColors.health} />
+              <HealthRoutes />
             </Layout>
-          } 
+          }
         />
-        
         {/* Módulo de Recreación/Salas */}
-        <Route 
-          path="/modules/recreation/*" 
+        <Route
+          path="/modules/recreation/*"
           element={
-            <Layout 
+            <Layout
               moduleColor={moduleColors.recreation}
               activeModule={MODULE_MAPPING.recreation}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
             >
-              <ModuleTemplate title="Gestión de Salas Recreativas" color={moduleColors.recreation} />
+              <RecreationalRoomsRoutes />
             </Layout>
-          } 
+          }
         />
-        
+
         {/* Módulo de Clases Extracurriculares */}
-        <Route 
-          path="/modules/extracurricular/*" 
+        <Route
+          path="/modules/extracurricular/*"
           element={
-            <Layout 
+            <Layout
               moduleColor={moduleColors.extracurricular}
               activeModule={MODULE_MAPPING.extracurricular}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
             >
-              <ModuleTemplate title="Clases Extracurriculares" color={moduleColors.extracurricular} />
+              <ExtracurricularClassesRoutes userRole="student" />
             </Layout>
-          } 
+          }
         />
-        
+
         {/* Módulo de Préstamos Deportivos */}
-        <Route 
-          path="/modules/sports/*" 
+        <Route
+          path="/modules/sports/*"
           element={
             <Layout
               moduleColor={moduleColors.sports}
               activeModule={MODULE_MAPPING.sports}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
             >
               <SportsHome />
             </Layout>
-          } 
+          }
         />
-        
+
         {/* Módulo de Gimnasio/Seguimiento */}
-        <Route 
-          path="/modules/gym/*" 
+        <Route
+          path="/modules/gym/*"
           element={
-            <Layout 
+            <Layout
               moduleColor={moduleColors.gym}
               activeModule={MODULE_MAPPING.gym}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
             >
-              <ModuleTemplate title="Gestión del Gimnasio" color={moduleColors.gym} />
+              <ModuleTemplate title="Gestión del Gimnasio" />
             </Layout>
-          } 
+          }
         />
-        
+
         {/* Módulo de Estadísticas */}
-        <Route 
-          path="/modules/statistics/*" 
+        <Route
+          path="/modules/statistics/*"
           element={
-            <Layout 
+            <Layout
               moduleColor={moduleColors.statistics}
               activeModule={MODULE_MAPPING.statistics}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
             >
-              <ModuleTemplate title="Estadísticas y Reportes" color={moduleColors.statistics} />
+              <ModuleTemplate
+                title="Estadísticas y Reportes"
+                // color={moduleColors.statistics}
+              />
             </Layout>
-          } 
+          }
         />
-        
+
         {/* Módulo de Usuarios */}
-        <Route 
-          path="/modules/users/*" 
+        <Route
+          path="/modules/users/*"
           element={
-            <Layout 
+            <Layout
               moduleColor={moduleColors.users}
               activeModule={MODULE_MAPPING.users}
-              onLogout={handleLogout}
               onNotificationsClick={handleNotificationsClick}
-              userEmail="administrador@ejemplo.com"
             >
-              <ModuleTemplate title="Gestión de Usuarios" color={moduleColors.users} />
+              <ModuleTemplate
+                title="Gestión de Usuarios"
+                // color={moduleColors.users}
+              />
             </Layout>
-          } 
+          }
         />
-        
-        {/* Ruta de fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+      </Route>
+
+      {/* Ruta de fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
