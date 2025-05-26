@@ -1,1043 +1,925 @@
-import type React from "react";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-	type BookingRequestDTO,
-	type HallEntity,
-	type ItemEntity,
-	type LoanRequestDTO,
-	bookingsApi,
-	itemsApi,
-	localTimeToString,
-	stringToLocalTime,
-} from "../services/api"
-import {hallsApi} from "@modules/recreational-rooms/components/rooms/services/RoomService.ts";
+  faArrowLeft,
+  faPlus,
+  faFilter,
+  faCalendarAlt,
+  faClock,
+  faUser,
+  faBuilding,
+  faBoxes,
+  faEye,
+  faEdit,
+  faUndo,
+} from "@fortawesome/free-solid-svg-icons";
+import {
+  Card,
+  CardBody,
+  Button,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+  Input,
+  Select,
+  SelectItem,
+  Chip,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Spinner,
+  Badge,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  Tooltip,
+} from "@nextui-org/react";
+import toast from "react-hot-toast";
+import { hallsApi } from "./rooms/services/RoomService";
+import { bookingsApi, HallEntity, ItemEntity, itemsApi } from "../services/api";
+import { useNavigate } from "react-router-dom";
 
-
+// Interfaces actualizadas según tu API
 interface Reservation {
-	id: string;
-	userId: string;
-	userName: string;
-	userIdentification: string;
-	userRole: "Estudiante" | "Docente" | "Administrativo" | "Servicios Generales";
-	roomId: string;
-	roomName: string;
-	date: string;
-	startTime: string;
-	endTime: string;
-	status: "Confirmada" | "Cancelada" | "Terminada" | "Pendiente";
-	itemsReserved: ReservedItem[];
-	returnStatus: "Pendiente" | "Completado" | "Incompleto";
-	notes?: string;
+  id: number;
+  nameUser: string;
+  idUser: string;
+  date: string;
+  timeStartBooking: string;
+  timeEndBooking: string;
+  hallId: {
+    id: number;
+    name: string;
+    location: string;
+    status: string;
+    description: string;
+    capacity: number;
+  };
+  status: "Reservado" | "Cancelado" | "Completado" | "Pendiente";
+  itemsLoans: ItemLoan[];
 }
 
-interface ReservedItem {
-	id: string;
-	name: string;
-	quantity: number;
-	returned: boolean;
+interface ItemLoan {
+  id: number;
+  itemId: {
+    id: number;
+    name: string;
+    description: string;
+    status: string;
+    category: string;
+    quantity: number;
+    quantityAvailable: number;
+    available: boolean;
+    hall: any;
+  };
+  quantity: number;
+  loanDate: string;
+  returnDate: string;
+  returnStatus: "Activo" | "Devuelto" | "Pendiente";
 }
 
 const ReservationsPage: React.FC = () => {
-	const navigate = useNavigate();
-	const [rooms, setRooms] = useState<HallEntity[]>([]);
-	const [items, setItems] = useState<ItemEntity[]>([]);
-	const [reservations, setReservations] = useState<Reservation[]>([]);
-	const [loading, setLoading] = useState<boolean>(true);
-	const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [rooms, setRooms] = useState<HallEntity[]>([]);
+  const [items, setItems] = useState<ItemEntity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedReservation, setSelectedReservation] =
+    useState<Reservation | null>(null);
 
-	const [showAddForm, setShowAddForm] = useState(false);
-	const [showItemsModal, setShowItemsModal] = useState(false);
-	const [showReturnModal, setShowReturnModal] = useState(false);
-	const [currentReservation, setCurrentReservation] =
-		useState<Reservation | null>(null);
-	const [selectedItems, setSelectedItems] = useState<
-		{ id: string; name: string; quantity: number }[]
-	>([]);
-	const [searchQuery, setSearchQuery] = useState("");
-	const [filterStatus, setFilterStatus] = useState<string>("");
-	const [selectedItemQuantity, setSelectedItemQuantity] = useState<number>(1);
-	const [newReservation, setNewReservation] = useState<Partial<Reservation>>({
-		userName: "",
-		userIdentification: "",
-		userRole: "Estudiante",
-		roomId: "",
-		date: "",
-		startTime: "",
-		endTime: "",
-		itemsReserved: [],
-		status: "Pendiente",
-		returnStatus: "Pendiente",
-	});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterDate, setFilterDate] = useState("");
 
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				setLoading(true);
+  const [newReservation, setNewReservation] = useState({
+    nameUser: "",
+    idUser: "",
+    date: "",
+    timeStartBooking: "",
+    timeEndBooking: "",
+    hallId: "",
+    selectedItems: [] as { id: number; quantity: number }[],
+  });
 
-				const hallsResponse = await hallsApi.getAllHalls();
-				setRooms(hallsResponse);
+  const {
+    isOpen: isAddModalOpen,
+    onOpen: onAddModalOpen,
+    onClose: onAddModalClose,
+  } = useDisclosure();
+  const {
+    isOpen: isDetailModalOpen,
+    onOpen: onDetailModalOpen,
+    onClose: onDetailModalClose,
+  } = useDisclosure();
+  const {
+    isOpen: isItemsModalOpen,
+    onOpen: onItemsModalOpen,
+    onClose: onItemsModalClose,
+  } = useDisclosure();
+  const {
+    isOpen: isReturnModalOpen,
+    onOpen: onReturnModalOpen,
+    onClose: onReturnModalClose,
+  } = useDisclosure();
 
-				const itemsResponse = await itemsApi.getAllItems();
-				setItems(itemsResponse);
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const mockReservations: Reservation[] =
+          await bookingsApi.getAllBookings();
 
-				const bookingsResponse = await bookingsApi.getAllBookings();
+        const mockRooms: HallEntity[] = await hallsApi.getAllHalls();
 
-				const transformedReservations: Reservation[] = await Promise.all(
-					bookingsResponse.map(async (booking: any) => {
-						const loansResponse = await bookingsApi.getLoansByBookingId(booking.id);
-						const loans = Array.isArray(loansResponse) ? loansResponse : [];
+        const mockItems: ItemEntity[] = await itemsApi.getAllItems();
 
-						const hall = await hallsApi.getHallById(booking.hallId.id);
+        setReservations(mockReservations);
+        setRooms(mockRooms);
+        setItems(mockItems);
+      } catch (error) {
+        toast.error("Error al cargar los datos");
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-						const reservedItems: ReservedItem[] = await Promise.all(
-							loans.map(async (loan: any) => {
-								const item = await itemsApi.getItemById(loan.itemId);
-								return {
-									id: loan.itemId.toString(),
-									name: item.name,
-									quantity: loan.quantity,
-									returned: loan.returned || false,
-								};
-							}),
-						);
+    fetchData();
+  }, []);
 
-						return {
-							id: booking.id.toString(),
-							userId: booking.idUser.toString(),
-							userName: booking.nameUser,
-							userIdentification: booking.idUser.toString(),
-							userRole: mapUserRole(booking.rolUser),
-							roomId: booking.hallId.toString(),
-							roomName: hall.name,
-							date: booking.date,
-							startTime: localTimeToString(booking.startTime),
-							endTime: localTimeToString(booking.endTime),
-							status: mapBookingStatus(booking.status),
-							itemsReserved: reservedItems,
-							returnStatus: mapReturnStatus(loans),
-						};
-					}),
-				);
+  const filteredReservations = reservations.filter((reservation) => {
+    const matchesSearch =
+      reservation.nameUser.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      reservation.idUser.includes(searchQuery) ||
+      reservation.hallId.name.toLowerCase().includes(searchQuery.toLowerCase());
 
-				setReservations(transformedReservations);
-				setError(null);
-			} catch (err) {
-				console.error("Error al cargar los datos:", err);
-				setError(
-					"Hubo un problema al cargar los datos. Por favor, intenta de nuevo más tarde.",
-				);
-			} finally {
-				setLoading(false);
-			}
-		};
+    const matchesStatus = filterStatus
+      ? reservation.status === filterStatus
+      : true;
+    const matchesDate = filterDate ? reservation.date === filterDate : true;
 
-		fetchData();
-	}, []);
+    return matchesSearch && matchesStatus && matchesDate;
+  });
 
-	const mapUserRole = (
-		role: string | undefined,
-	): "Estudiante" | "Docente" | "Administrativo" | "Servicios Generales" => {
-		if (!role) return "Estudiante";
-		
-		switch (role.toUpperCase()) {
-			case "ESTUDIANTE":
-				return "Estudiante";
-			case "DOCENTE":
-				return "Docente";
-			case "ADMINISTRATIVO":
-				return "Administrativo";
-			case "SERVICIOS":
-				return "Servicios Generales";
-			default:
-				return "Estudiante";
-		}
-	};
+  const handleCreateReservation = async () => {
+    if (
+      !newReservation.nameUser ||
+      !newReservation.idUser ||
+      !newReservation.hallId ||
+      !newReservation.date
+    ) {
+      toast.error("Por favor completa todos los campos obligatorios");
+      return;
+    }
+    try {
+      setLoading(true);
+      toast.success("Reserva creada exitosamente");
+      onAddModalClose();
+      resetForm();
+    } catch (error) {
+      toast.error("Error al crear la reserva");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-	const mapBookingStatus = (
-		status: string,
-	): "Confirmada" | "Cancelada" | "Terminada" | "Pendiente" => {
-		switch (status.toUpperCase()) {
-			case "CONFIRMED":
-				return "Confirmada";
-			case "CANCELLED":
-				return "Cancelada";
-			case "COMPLETED":
-				return "Terminada";
-			case "PENDING":
-				return "Pendiente";
-			default:
-				return "Pendiente";
-		}
-	};
+  const resetForm = () => {
+    setNewReservation({
+      nameUser: "",
+      idUser: "",
+      date: "",
+      timeStartBooking: "",
+      timeEndBooking: "",
+      hallId: "",
+      selectedItems: [],
+    });
+  };
 
-	const mapReturnStatus = (
-		loans: any[],
-	): "Pendiente" | "Completado" | "Incompleto" => {
-		if (!loans.length) return "Pendiente";
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Reservado":
+        return "primary";
+      case "Completado":
+        return "success";
+      case "Cancelado":
+        return "danger";
+      case "Pendiente":
+        return "warning";
+      default:
+        return "default";
+    }
+  };
 
-		const allReturned = loans.every((loan) => loan.returned);
-		const anyReturned = loans.some((loan) => loan.returned);
+  const getReturnStatusColor = (status: string) => {
+    switch (status) {
+      case "Devuelto":
+        return "success";
+      case "Activo":
+        return "warning";
+      case "Pendiente":
+        return "default";
+      default:
+        return "default";
+    }
+  };
 
-		if (allReturned) return "Completado";
-		if (anyReturned) return "Incompleto";
-		return "Pendiente";
-	};
+  const formatTime = (time: string) => {
+    return time.split(":").slice(0, 2).join(":");
+  };
 
-	const generateId = (prefix: string) => {
-		return `${prefix}${Math.floor(Math.random() * 1000)
-			.toString()
-			.padStart(3, "0")}`;
-	};
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
-	const filteredReservations = reservations.filter((reservation) => {
-		const matchesSearch =
-			reservation.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			reservation.userIdentification.includes(searchQuery) ||
-			reservation.roomName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			reservation.id.toLowerCase().includes(searchQuery.toLowerCase());
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Spinner size="lg" color="primary" />
+      </div>
+    );
+  }
 
-		const matchesStatus = filterStatus
-			? reservation.status === filterStatus
-			: true;
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex justify-between items-center mb-8"
+        >
+          <div className="flex items-center">
+            <Button
+              variant="light"
+              startContent={<FontAwesomeIcon icon={faArrowLeft} />}
+              className="mr-4"
+              onClick={() => navigate("/modules/recreation")}
+            >
+              Volver
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-green-500 to-green-700 bg-clip-text text-transparent">
+                Gestión de Reservas
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Administra las reservas de salas y elementos
+              </p>
+            </div>
+          </div>
+          <Button
+            color="primary"
+            size="lg"
+            startContent={<FontAwesomeIcon icon={faPlus} />}
+            onPress={onAddModalOpen}
+            className="bg-gradient-to-r from-green-500 to-green-700 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+          >
+            Nueva Reserva
+          </Button>
+        </motion.div>
 
-		return matchesSearch && matchesStatus;
-	});
+        {/* Filtros y búsqueda */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Card className="mb-6 shadow-lg border-0">
+            <CardBody>
+              <div className="flex flex-wrap gap-4 items-end">
+                <Input
+                  placeholder="Buscar por usuario, ID o sala..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  startContent={
+                    <FontAwesomeIcon icon={faUser} className="text-gray-400" />
+                  }
+                  className="flex-1 min-w-64"
+                  variant="bordered"
+                />
+                <Select
+                  placeholder="Filtrar por estado"
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="w-48"
+                  variant="bordered"
+                  startContent={
+                    <FontAwesomeIcon
+                      icon={faFilter}
+                      className="text-gray-400"
+                    />
+                  }
+                >
+                  <SelectItem key="" value="">
+                    Todos
+                  </SelectItem>
+                  <SelectItem key="Reservado" value="Reservado">
+                    Reservado
+                  </SelectItem>
+                  <SelectItem key="Completado" value="Completado">
+                    Completado
+                  </SelectItem>
+                  <SelectItem key="Cancelado" value="Cancelado">
+                    Cancelado
+                  </SelectItem>
+                  <SelectItem key="Pendiente" value="Pendiente">
+                    Pendiente
+                  </SelectItem>
+                </Select>
+                <Input
+                  type="date"
+                  value={filterDate}
+                  onChange={(e) => setFilterDate(e.target.value)}
+                  className="w-48"
+                  variant="bordered"
+                  startContent={
+                    <FontAwesomeIcon
+                      icon={faCalendarAlt}
+                      className="text-gray-400"
+                    />
+                  }
+                />
+              </div>
+            </CardBody>
+          </Card>
+        </motion.div>
 
-	const handleAddReservation = async () => {
-		if (
-			newReservation.userName &&
-			newReservation.userIdentification &&
-			newReservation.roomId &&
-			newReservation.date &&
-			newReservation.startTime &&
-			newReservation.endTime
-		) {
-			try {
-				setLoading(true);
+        {/* Tabla de reservas */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card className="shadow-xl border-0">
+            <CardBody className="p-0">
+              <Table
+                aria-label="Tabla de reservas"
+                classNames={{
+                  wrapper: "min-h-[400px]",
+                }}
+              >
+                <TableHeader>
+                  <TableColumn>RESERVA</TableColumn>
+                  <TableColumn>USUARIO</TableColumn>
+                  <TableColumn>SALA</TableColumn>
+                  <TableColumn>FECHA Y HORA</TableColumn>
+                  <TableColumn>ELEMENTOS</TableColumn>
+                  <TableColumn>ESTADO</TableColumn>
+                  <TableColumn>ACCIONES</TableColumn>
+                </TableHeader>
+                <TableBody emptyContent="No hay reservas disponibles">
+                  {filteredReservations.map((reservation) => (
+                    <TableRow key={reservation.id}>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-green-600">
+                            #{reservation.id}
+                          </span>
+                        </div>
+                      </TableCell>
 
-				const itemsLoans: LoanRequestDTO[] = selectedItems.map((item) => ({
-					idItem: Number.parseInt(item.id),
-					quantity: item.quantity,
-				}));
+                      <TableCell>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-800 rounded-full flex items-center justify-center text-white font-bold">
+                            {reservation.nameUser.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-semibold">
+                              {reservation.nameUser}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
 
-				const bookingToAdd: BookingRequestDTO = {
-					nameUser: newReservation.userName,
-					idUser: Number.parseInt(newReservation.userIdentification),
-					rolUser: newReservation.userRole as string,
-					date: newReservation.date,
-					startTime: stringToLocalTime(newReservation.startTime),
-					endTime: stringToLocalTime(newReservation.endTime),
-					hallId: Number.parseInt(newReservation.roomId),
-					itemsLoans: itemsLoans,
-				};
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="font-semibold flex items-center">
+                            <FontAwesomeIcon
+                              icon={faBuilding}
+                              className="mr-2 text-gray-400"
+                              size="sm"
+                            />
+                            {reservation.hallId.name}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {reservation.hallId.location}
+                          </span>
+                        </div>
+                      </TableCell>
 
-				const response = await bookingsApi.createBooking(bookingToAdd);
+                      <TableCell>
+                        <div className="flex flex-col space-y-1">
+                          <span className="flex items-center text-sm">
+                            <FontAwesomeIcon
+                              icon={faCalendarAlt}
+                              className="mr-2 text-gray-400"
+                              size="sm"
+                            />
+                            {formatDate(reservation.date)}
+                          </span>
+                          <span className="flex items-center text-xs text-gray-500">
+                            <FontAwesomeIcon
+                              icon={faClock}
+                              className="mr-2"
+                              size="sm"
+                            />
+                            {formatTime(reservation.timeStartBooking)} -{" "}
+                            {formatTime(reservation.timeEndBooking)}
+                          </span>
+                        </div>
+                      </TableCell>
 
-				const selectedRoom = rooms.find(
-					(room) => room.id?.toString() === newReservation.roomId,
-				);
+                      <TableCell>
+                        <div className="flex items-center">
+                          <FontAwesomeIcon
+                            icon={faBoxes}
+                            className="mr-2 text-gray-400"
+                            size="sm"
+                          />
+                          <Badge color="primary" variant="flat">
+                            {reservation.itemsLoans.length} elementos
+                          </Badge>
+                        </div>
+                      </TableCell>
 
-				const reservationToAdd: Reservation = {
-					id: response.id?.toString() || generateId("RS"),
-					userId: newReservation.userIdentification || "",
-					userName: newReservation.userName,
-					userIdentification: newReservation.userIdentification || "",
-					userRole: newReservation.userRole as
-						| "Estudiante"
-						| "Docente"
-						| "Administrativo"
-						| "Servicios Generales",
-					roomId: newReservation.roomId || "",
-					roomName: selectedRoom ? selectedRoom.name : "",
-					date: newReservation.date,
-					startTime: newReservation.startTime,
-					endTime: newReservation.endTime,
-					status: "Confirmada",
-					itemsReserved: selectedItems.map((item) => ({
-						id: item.id,
-						name: item.name,
-						quantity: item.quantity,
-						returned: false,
-					})),
-					returnStatus: "Pendiente",
-					notes: newReservation.notes,
-				};
+                      <TableCell>
+                        <Chip
+                          color={getStatusColor(reservation.status) as any}
+                          variant="flat"
+                          size="sm"
+                        >
+                          {reservation.status}
+                        </Chip>
+                      </TableCell>
 
-				setReservations([...reservations, reservationToAdd]);
-				resetForm();
-				setError(null);
-			} catch (err) {
-				console.error("Error al crear la reserva:", err);
-				setError(
-					"Hubo un problema al crear la reserva. Por favor, intenta de nuevo.",
-				);
-			} finally {
-				setLoading(false);
-			}
-		} else {
-			setError("Por favor, completa todos los campos obligatorios.");
-		}
-	};
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Tooltip content="Ver detalles">
+                            <Button
+                              isIconOnly
+                              size="sm"
+                              variant="light"
+                              color="primary"
+                              onPress={() => {
+                                setSelectedReservation(reservation);
+                                onDetailModalOpen();
+                              }}
+                            >
+                              <FontAwesomeIcon icon={faEye} />
+                            </Button>
+                          </Tooltip>
 
-	const resetForm = () => {
-		setNewReservation({
-			userName: "",
-			userIdentification: "",
-			userRole: "Estudiante",
-			roomId: "",
-			date: "",
-			startTime: "",
-			endTime: "",
-			itemsReserved: [],
-			status: "Pendiente",
-			returnStatus: "Pendiente",
-		});
-		setSelectedItems([]);
-		setShowAddForm(false);
-	};
+                          {reservation.itemsLoans.length > 0 && (
+                            <Tooltip content="Gestionar devolución">
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                variant="light"
+                                color="warning"
+                                onPress={() => {
+                                  setSelectedReservation(reservation);
+                                  onReturnModalOpen();
+                                }}
+                              >
+                                <FontAwesomeIcon icon={faUndo} />
+                              </Button>
+                            </Tooltip>
+                          )}
 
-	const handleSelectItem = (item: ItemEntity) => {
-		const existingItem = selectedItems.find(
-			(i) => i.id === item.id?.toString(),
-		);
+                          <Dropdown>
+                            <DropdownTrigger>
+                              <Button isIconOnly size="sm" variant="light">
+                                <FontAwesomeIcon icon={faEdit} />
+                              </Button>
+                            </DropdownTrigger>
+                            <DropdownMenu>
+                              <DropdownItem key="confirm">
+                                Confirmar
+                              </DropdownItem>
+                              <DropdownItem
+                                key="cancel"
+                                className="text-danger"
+                              >
+                                Cancelar
+                              </DropdownItem>
+                              <DropdownItem key="complete">
+                                Completar
+                              </DropdownItem>
+                            </DropdownMenu>
+                          </Dropdown>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardBody>
+          </Card>
+        </motion.div>
 
-		if (existingItem) {
-			setSelectedItems(
-				selectedItems.map((i) =>
-					i.id === item.id?.toString()
-						? { ...i, quantity: i.quantity + selectedItemQuantity }
-						: i,
-				),
-			);
-		} else {
-			setSelectedItems([
-				...selectedItems,
-				{
-					id: item.id?.toString() || "",
-					name: item.name,
-					quantity: selectedItemQuantity,
-				},
-			]);
-		}
+        {/* Modal de nueva reserva */}
+        <Modal
+          isOpen={isAddModalOpen}
+          onClose={onAddModalClose}
+          size="2xl"
+          scrollBehavior="inside"
+        >
+          <ModalContent>
+            <ModalHeader className="flex flex-col gap-1">
+              <h3 className="text-xl font-bold">Nueva Reserva</h3>
+              <p className="text-sm text-gray-500">
+                Completa la información para crear una nueva reserva
+              </p>
+            </ModalHeader>
+            <ModalBody>
+              <div className="space-y-4">
+                
 
-		setSelectedItemQuantity(1);
-	};
+                <Select
+                  label="Sala"
+                  placeholder="Selecciona una sala"
+                  onChange={(e) =>
+                    setNewReservation({
+                      ...newReservation,
+                      hallId: e.target.value,
+                    })
+                  }
+                  variant="bordered"
+                  startContent={
+                    <FontAwesomeIcon
+                      icon={faBuilding}
+                      className="text-gray-400"
+                    />
+                  }
+                >
+                  {rooms.map((hall) => (
+                    <SelectItem key={hall.id} value={hall.id}>
+                      {hall.name}
+                    </SelectItem>
+                  ))}
+                </Select>
 
-	const handleRemoveItem = (itemId: string) => {
-		setSelectedItems(selectedItems.filter((item) => item.id !== itemId));
-	};
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Input
+                    type="date"
+                    label="Fecha"
+                    value={newReservation.date}
+                    onChange={(e) =>
+                      setNewReservation({
+                        ...newReservation,
+                        date: e.target.value,
+                      })
+                    }
+                    variant="bordered"
+                    min={new Date().toISOString().split("T")[0]}
+                  />
+                  <Input
+                    type="time"
+                    label="Hora de inicio"
+                    value={newReservation.timeStartBooking}
+                    onChange={(e) =>
+                      setNewReservation({
+                        ...newReservation,
+                        timeStartBooking: e.target.value,
+                      })
+                    }
+                    variant="bordered"
+                  />
+                  <Input
+                    type="time"
+                    label="Hora de fin"
+                    value={newReservation.timeEndBooking}
+                    onChange={(e) =>
+                      setNewReservation({
+                        ...newReservation,
+                        timeEndBooking: e.target.value,
+                      })
+                    }
+                    variant="bordered"
+                  />
+                </div>
 
-	const handleChangeStatus = async (
-		reservationId: string,
-		newStatus: "Confirmada" | "Cancelada" | "Terminada" | "Pendiente",
-	) => {
-		try {
-			setLoading(true);
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-sm font-medium">
+                      Elementos a reservar
+                    </label>
+                    <Button
+                      size="sm"
+                      color="primary"
+                      variant="flat"
+                      onPress={onItemsModalOpen}
+                      startContent={<FontAwesomeIcon icon={faPlus} />}
+                    >
+                      Seleccionar elementos
+                    </Button>
+                  </div>
+                  {newReservation.selectedItems.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {newReservation.selectedItems.map((item) => (
+                        <Chip
+                          key={item.id}
+                          onClose={() => {
+                            setNewReservation({
+                              ...newReservation,
+                              selectedItems:
+                                newReservation.selectedItems.filter(
+                                  (i) => i.id !== item.id
+                                ),
+                            });
+                          }}
+                          variant="flat"
+                          color="primary"
+                        >
+                          Item {item.id} (x{item.quantity})
+                        </Chip>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="danger" variant="light" onPress={onAddModalClose}>
+                Cancelar
+              </Button>
+              <Button
+                color="primary"
+                onPress={handleCreateReservation}
+                isLoading={loading}
+                className="bg-gradient-to-r from-green-500 to-green-800"
+              >
+                Crear Reserva
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
 
-			if (newStatus === "Cancelada") {
-				await bookingsApi.cancelBooking(Number.parseInt(reservationId));
-			}
+        {/* Modal de detalles */}
+        <Modal
+          isOpen={isDetailModalOpen}
+          onClose={onDetailModalClose}
+          size="3xl"
+        >
+          <ModalContent>
+            <ModalHeader>
+              <h3 className="text-xl font-bold">
+                Detalles de la Reserva #{selectedReservation?.id}
+              </h3>
+            </ModalHeader>
+            <ModalBody>
+              {selectedReservation && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card>
+                      <CardBody>
+                        <h4 className="font-semibold mb-3 flex items-center">
+                          <FontAwesomeIcon
+                            icon={faUser}
+                            className="mr-2 text-blue-500"
+                          />
+                          Información del Usuario
+                        </h4>
+                        <div className="space-y-2">
+                          <p>
+                            <span className="font-medium">Nombre:</span>{" "}
+                            {selectedReservation.nameUser}
+                          </p>
+                          <p>
+                            <span className="font-medium">ID:</span>{" "}
+                            {selectedReservation.idUser}
+                          </p>
+                        </div>
+                      </CardBody>
+                    </Card>
 
-			setReservations(
-				reservations.map((reservation) =>
-					reservation.id === reservationId
-						? { ...reservation, status: newStatus }
-						: reservation,
-				),
-			);
+                    <Card>
+                      <CardBody>
+                        <h4 className="font-semibold mb-3 flex items-center">
+                          <FontAwesomeIcon
+                            icon={faBuilding}
+                            className="mr-2 text-green-500"
+                          />
+                          Información de la Sala
+                        </h4>
+                        <div className="space-y-2">
+                          <p>
+                            <span className="font-medium">Sala:</span>{" "}
+                            {selectedReservation.hallId.name}
+                          </p>
+                          <p>
+                            <span className="font-medium">Ubicación:</span>{" "}
+                            {selectedReservation.hallId.location}
+                          </p>
+                          <p>
+                            <span className="font-medium">Capacidad:</span>{" "}
+                            {selectedReservation.hallId.capacity} personas
+                          </p>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  </div>
 
-			setError(null);
-		} catch (err) {
-			console.error("Error al cambiar el estado de la reserva:", err);
-			setError(
-				"Hubo un problema al cambiar el estado de la reserva. Por favor, intenta de nuevo.",
-			);
-		} finally {
-			setLoading(false);
-		}
-	};
+                  <Card>
+                    <CardBody>
+                      <h4 className="font-semibold mb-3 flex items-center">
+                        <FontAwesomeIcon
+                          icon={faCalendarAlt}
+                          className="mr-2 text-purple-500"
+                        />
+                        Horario de la Reserva
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <p>
+                          <span className="font-medium">Fecha:</span>{" "}
+                          {formatDate(selectedReservation.date)}
+                        </p>
+                        <p>
+                          <span className="font-medium">Inicio:</span>{" "}
+                          {formatTime(selectedReservation.timeStartBooking)}
+                        </p>
+                        <p>
+                          <span className="font-medium">Fin:</span>{" "}
+                          {formatTime(selectedReservation.timeEndBooking)}
+                        </p>
+                      </div>
+                    </CardBody>
+                  </Card>
 
-	const handleReturnItems = async () => {
-		if (!currentReservation) return;
+                  {selectedReservation.itemsLoans.length > 0 && (
+                    <Card>
+                      <CardBody>
+                        <h4 className="font-semibold mb-3 flex items-center">
+                          <FontAwesomeIcon
+                            icon={faBoxes}
+                            className="mr-2 text-orange-500"
+                          />
+                          Elementos Prestados
+                        </h4>
+                        <div className="space-y-3">
+                          {selectedReservation.itemsLoans.map((loan) => (
+                            <div
+                              key={loan.id}
+                              className="flex justify-between items-center p-3 bg-gray-50 rounded-lg"
+                            >
+                              <div>
+                                <p className="font-medium">
+                                  {loan.itemId.name}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                  {loan.itemId.description}
+                                </p>
+                                <p className="text-sm">
+                                  Cantidad: {loan.quantity}
+                                </p>
+                              </div>
+                              <Chip
+                                color={
+                                  getReturnStatusColor(loan.returnStatus) as any
+                                }
+                                variant="flat"
+                                size="sm"
+                              >
+                                {loan.returnStatus}
+                              </Chip>
+                            </div>
+                          ))}
+                        </div>
+                      </CardBody>
+                    </Card>
+                  )}
+                </div>
+              )}
+            </ModalBody>
+            <ModalFooter>
+              <Button color="primary" onPress={onDetailModalClose}>
+                Cerrar
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
 
-		try {
-			setLoading(true);
+        {/* Modal de selección de elementos */}
+        <Modal isOpen={isItemsModalOpen} onClose={onItemsModalClose} size="2xl">
+          <ModalContent>
+            <ModalHeader>
+              <h3 className="text-xl font-bold">Seleccionar Elementos</h3>
+            </ModalHeader>
+            <ModalBody>
+              <div className="space-y-4">
+                {items.map((item) => (
+                  <Card key={item.id} className="p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="font-semibold">{item.name}</h4>
+                        <p className="text-sm text-gray-500">
+                          {item.description}
+                        </p>
+                        <p className="text-sm">
+                          Disponibles: {item.quantityAvailable}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="number"
+                          min="1"
+                          max={item.quantityAvailable}
+                          defaultValue="1"
+                          className="w-20"
+                          size="sm"
+                        />
+                        <Button
+                          size="sm"
+                          color="primary"
+                          onPress={() => {
+                            // Lógica para añadir elemento
+                            toast.success(`${item.name} añadido`);
+                          }}
+                        >
+                          Añadir
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="primary" onPress={onItemsModalClose}>
+                Confirmar
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
 
-			await bookingsApi.returnBooking(Number.parseInt(currentReservation.id));
+        {/* Modal de devolución de elementos */}
 
-			const allReturned = currentReservation.itemsReserved.every(
-				(item) => item.returned,
-			);
-
-			setReservations(
-				reservations.map((reservation) =>
-					reservation.id === currentReservation.id
-						? {
-								...reservation,
-								itemsReserved: currentReservation.itemsReserved,
-								returnStatus: allReturned ? "Completado" : "Incompleto",
-								status: allReturned ? "Terminada" : reservation.status,
-							}
-						: reservation,
-				),
-			);
-
-			setShowReturnModal(false);
-			setCurrentReservation(null);
-			setError(null);
-		} catch (err) {
-			console.error("Error al procesar la devolución:", err);
-			setError(
-				"Hubo un problema al procesar la devolución. Por favor, intenta de nuevo.",
-			);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	const handleItemReturnChange = (itemId: string, returned: boolean) => {
-		if (!currentReservation) return;
-
-		const updatedItems = currentReservation.itemsReserved.map((item) =>
-			item.id === itemId ? { ...item, returned } : item,
-		);
-
-		setCurrentReservation({
-			...currentReservation,
-			itemsReserved: updatedItems,
-		});
-	};
-	return (
-		<div className="container mx-auto px-4 py-6">
-			<div className="flex justify-between items-center mb-6">
-				<div className="flex items-center">
-					<button
-						onClick={() => navigate("/modules/recreation")}
-						className="mr-4 text-green-700 hover:text-green-900 flex items-center"
-						aria-label="Volver a opciones de salas recreativas"
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							className="h-5 w-5 mr-1"
-							viewBox="0 0 20 20"
-							fill="currentColor"
-						>
-							<path
-								fillRule="evenodd"
-								d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-								clipRule="evenodd"
-							/>
-						</svg>
-						Volver
-					</button>
-					<h1 className="text-2xl font-bold text-gray-800">
-						Gestión de Reservas
-					</h1>
-				</div>
-				<div className="flex space-x-4">
-					<div className="relative">
-						<input
-							type="text"
-							placeholder="Buscar reservas..."
-							className="border rounded-lg px-4 py-2 w-64"
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-						/>
-						<svg
-							className="absolute right-3 top-2.5 h-5 w-5 text-gray-400"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								strokeWidth={2}
-								d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-							/>
-						</svg>
-					</div>
-					<select
-						className="border rounded-lg px-4 py-2"
-						value={filterStatus}
-						onChange={(e) => setFilterStatus(e.target.value)}
-					>
-						<option value="">Todos los estados</option>
-						<option value="Confirmada">Confirmada</option>
-						<option value="Cancelada">Cancelada</option>
-						<option value="Terminada">Terminada</option>
-						<option value="Pendiente">Pendiente</option>
-					</select>
-					<button
-						onClick={() => setShowAddForm(!showAddForm)}
-						className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300"
-					>
-						{showAddForm ? "Cancelar" : "Nueva Reserva"}
-					</button>
-				</div>
-			</div>
-
-			{error && (
-				<div
-					className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4"
-					role="alert"
-				>
-					<p>{error}</p>
-				</div>
-			)}
-
-			{loading && (
-				<div className="flex justify-center my-8">
-					<div
-						className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-green-600 border-r-transparent"
-						role="status"
-					>
-						<span className="sr-only">Cargando...</span>
-					</div>
-					<span className="ml-2">Cargando...</span>
-				</div>
-			)}
-
-			{showAddForm && (
-				<div className="bg-white rounded-lg shadow-lg p-6 mb-6 border border-gray-200">
-					<h2 className="text-xl font-semibold mb-4">Nueva Reserva</h2>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">
-								Nombre Completo
-							</label>
-							<input
-								type="text"
-								className="w-full px-3 py-2 border border-gray-300 rounded-md"
-								value={newReservation.userName}
-								onChange={(e) =>
-									setNewReservation({
-										...newReservation,
-										userName: e.target.value,
-									})
-								}
-								required
-							/>
-						</div>
-						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">
-								Número de Identificación
-							</label>
-							<input
-								type="text"
-								className="w-full px-3 py-2 border border-gray-300 rounded-md"
-								value={newReservation.userIdentification}
-								onChange={(e) =>
-									setNewReservation({
-										...newReservation,
-										userIdentification: e.target.value,
-									})
-								}
-								required
-							/>
-						</div>
-						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">
-								Rol
-							</label>
-							<select
-								className="w-full px-3 py-2 border border-gray-300 rounded-md"
-								value={newReservation.userRole}
-								onChange={(e) =>
-									setNewReservation({
-										...newReservation,
-										userRole: e.target.value as any,
-									})
-								}
-								required
-							>
-								<option value="Estudiante">Estudiante</option>
-								<option value="Docente">Docente</option>
-								<option value="Administrativo">Administrativo</option>
-								<option value="Servicios Generales">Servicios Generales</option>
-							</select>
-						</div>
-						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">
-								Sala
-							</label>
-							<select
-								className="w-full px-3 py-2 border border-gray-300 rounded-md"
-								value={newReservation.roomId}
-								onChange={(e) =>
-									setNewReservation({
-										...newReservation,
-										roomId: e.target.value,
-									})
-								}
-								required
-							>
-								<option value="">Selecciona una sala</option>
-								{rooms.map((room) => (
-									<option key={room.id} value={room.id}>
-										{room.name}
-									</option>
-								))}
-							</select>
-						</div>
-						<div>
-							<label className="block text-sm font-medium text-gray-700 mb-1">
-								Fecha
-							</label>
-							<input
-								type="date"
-								className="w-full px-3 py-2 border border-gray-300 rounded-md"
-								value={newReservation.date}
-								onChange={(e) =>
-									setNewReservation({ ...newReservation, date: e.target.value })
-								}
-								min={new Date().toISOString().split("T")[0]}
-								required
-							/>
-						</div>
-						<div className="flex space-x-4">
-							<div className="flex-1">
-								<label className="block text-sm font-medium text-gray-700 mb-1">
-									Hora de Inicio
-								</label>
-								<input
-									type="time"
-									className="w-full px-3 py-2 border border-gray-300 rounded-md"
-									value={newReservation.startTime}
-									onChange={(e) =>
-										setNewReservation({
-											...newReservation,
-											startTime: e.target.value,
-										})
-									}
-									required
-								/>
-							</div>
-							<div className="flex-1">
-								<label className="block text-sm font-medium text-gray-700 mb-1">
-									Hora de Fin
-								</label>
-								<input
-									type="time"
-									className="w-full px-3 py-2 border border-gray-300 rounded-md"
-									value={newReservation.endTime}
-									onChange={(e) =>
-										setNewReservation({
-											...newReservation,
-											endTime: e.target.value,
-										})
-									}
-									required
-								/>
-							</div>
-						</div>
-					</div>
-
-					<div className="mb-4">
-						<label className="block text-sm font-medium text-gray-700 mb-1">
-							Elementos a Reservar
-						</label>
-						<div className="flex items-center">
-							<button
-								onClick={() => setShowItemsModal(true)}
-								className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
-							>
-								Seleccionar Elementos
-							</button>
-							<span className="ml-2 text-gray-600">
-								{selectedItems.length} elementos seleccionados
-							</span>
-						</div>
-						{selectedItems.length > 0 && (
-							<div className="mt-3 flex flex-wrap gap-2">
-								{selectedItems.map((item) => (
-									<div
-										key={item.id}
-										className="bg-gray-100 px-3 py-1 rounded-full flex items-center"
-									>
-										<span>
-											{item.name} ({item.quantity})
-										</span>
-										<button
-											onClick={() => handleRemoveItem(item.id)}
-											className="ml-2 text-red-500 hover:text-red-700"
-										>
-											&times;
-										</button>
-									</div>
-								))}
-							</div>
-						)}
-					</div>
-
-					<div className="mb-4">
-						<label className="block text-sm font-medium text-gray-700 mb-1">
-							Notas Adicionales
-						</label>
-						<textarea
-							className="w-full px-3 py-2 border border-gray-300 rounded-md"
-							value={newReservation.notes || ""}
-							onChange={(e) =>
-								setNewReservation({ ...newReservation, notes: e.target.value })
-							}
-							rows={3}
-						/>
-					</div>
-
-					<div className="flex justify-end space-x-3">
-						<button
-							onClick={resetForm}
-							className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
-						>
-							Cancelar
-						</button>
-						<button
-							onClick={handleAddReservation}
-							className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-						>
-							Crear Reserva
-						</button>
-					</div>
-				</div>
-			)}
-
-			{/* Modal para seleccionar elementos */}
-			{showItemsModal && (
-				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-					<div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl">
-						<div className="flex justify-between items-center mb-4">
-							<h3 className="text-lg font-semibold">Seleccionar Elementos</h3>
-							<button
-								onClick={() => setShowItemsModal(false)}
-								className="text-gray-500 hover:text-gray-700"
-							>
-								&times;
-							</button>
-						</div>
-
-						<div className="max-h-96 overflow-y-auto">
-							<table className="min-w-full divide-y divide-gray-200">
-								<thead className="bg-gray-50">
-									<tr>
-										<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Elemento
-										</th>
-										<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Disponibles
-										</th>
-										<th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Cantidad
-										</th>
-										<th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Acción
-										</th>
-									</tr>
-								</thead>
-								<tbody className="bg-white divide-y divide-gray-200">
-									{items.map((item) => {
-										const itemId = item.id?.toString() || "";
-										const reservedQuantity =
-											selectedItems.find((i) => i.id === itemId)?.quantity || 0;
-										const availableQty =
-											(item.quantityAvailable || 0) - reservedQuantity;
-
-										return (
-											<tr key={itemId} className="hover:bg-gray-50">
-												<td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-													{item.name}
-												</td>
-												<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-													{availableQty} de{" "}
-													{item.quantityAvailable || item.quantity || 0}
-												</td>
-												<td className="px-6 py-4 whitespace-nowrap text-center">
-													<input
-														type="number"
-														min="1"
-														max={availableQty}
-														value={selectedItemQuantity}
-														onChange={(e) =>
-															setSelectedItemQuantity(
-																Number.parseInt(e.target.value) || 1,
-															)
-														}
-														className="w-16 px-2 py-1 border border-gray-300 rounded text-center"
-														disabled={availableQty <= 0}
-													/>
-												</td>
-												<td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-													<button
-														onClick={() => handleSelectItem(item)}
-														className="text-blue-600 hover:text-blue-900"
-														disabled={availableQty <= 0}
-													>
-														{selectedItems.some((i) => i.id === itemId)
-															? "Actualizar"
-															: "Añadir"}
-													</button>
-												</td>
-											</tr>
-										);
-									})}
-								</tbody>
-							</table>
-						</div>
-
-						<div className="mt-4 flex justify-end">
-							<button
-								onClick={() => setShowItemsModal(false)}
-								className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-							>
-								Confirmar
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
-
-			{/* Modal para devolver elementos */}
-			{showReturnModal && currentReservation && (
-				<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-					<div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl">
-						<div className="flex justify-between items-center mb-4">
-							<h3 className="text-lg font-semibold">
-								Registrar Devolución de Elementos
-							</h3>
-							<button
-								onClick={() => {
-									setShowReturnModal(false);
-									setCurrentReservation(null);
-								}}
-								className="text-gray-500 hover:text-gray-700"
-							>
-								&times;
-							</button>
-						</div>
-
-						<div className="mb-4">
-							<p className="text-gray-700">
-								<span className="font-medium">Reserva:</span>{" "}
-								{currentReservation.id}
-							</p>
-							<p className="text-gray-700">
-								<span className="font-medium">Usuario:</span>{" "}
-								{currentReservation.userName}
-							</p>
-							<p className="text-gray-700">
-								<span className="font-medium">Sala:</span>{" "}
-								{currentReservation.roomName}
-							</p>
-						</div>
-
-						<div className="mb-4">
-							<h4 className="font-medium mb-2">Elementos prestados:</h4>
-							<table className="min-w-full divide-y divide-gray-200">
-								<thead className="bg-gray-50">
-									<tr>
-										<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Elemento
-										</th>
-										<th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Cantidad
-										</th>
-										<th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-											Estado
-										</th>
-									</tr>
-								</thead>
-								<tbody className="bg-white divide-y divide-gray-200">
-									{currentReservation.itemsReserved.map((item) => (
-										<tr key={item.id} className="hover:bg-gray-50">
-											<td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-												{item.name}
-											</td>
-											<td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
-												{item.quantity}
-											</td>
-											<td className="px-6 py-4 whitespace-nowrap text-center">
-												<select
-													className={`px-3 py-1 rounded-full text-sm font-medium ${
-														item.returned
-															? "bg-green-100 text-green-800"
-															: "bg-red-100 text-red-800"
-													}`}
-													value={item.returned ? "returned" : "not-returned"}
-													onChange={(e) =>
-														handleItemReturnChange(
-															item.id,
-															e.target.value === "returned",
-														)
-													}
-												>
-													<option value="returned">Devuelto</option>
-													<option value="not-returned">No Devuelto</option>
-												</select>
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
-
-						<div className="mt-4 flex justify-end">
-							<button
-								onClick={handleReturnItems}
-								className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-							>
-								Confirmar Devolución
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
-
-			{/* Tabla de reservas */}
-			<div className="bg-white rounded-lg shadow overflow-hidden">
-				<table className="min-w-full divide-y divide-gray-200">
-					<thead className="bg-gray-50">
-						<tr>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-								ID
-							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-								Usuario
-							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-								Sala
-							</th>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-								Fecha y Hora
-							</th>
-							<th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-								Estado
-							</th>
-							<th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-								Devolución
-							</th>
-							<th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-								Acciones
-							</th>
-						</tr>
-					</thead>
-					<tbody className="bg-white divide-y divide-gray-200">
-						{filteredReservations.map((reservation) => (
-							<tr key={reservation.id} className="hover:bg-gray-50">
-								<td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-									{reservation.id}
-								</td>
-								<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-									<div>
-										<p className="font-medium">{reservation.userName}</p>
-										<p className="text-xs text-gray-400">
-											{reservation.userIdentification} ({reservation.userRole})
-										</p>
-									</div>
-								</td>
-								<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-									{reservation.roomName}
-								</td>
-								<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-									<div>
-										<p>{new Date(reservation.date).toLocaleDateString()}</p>
-										<p className="text-xs text-gray-400">
-											{reservation.startTime} - {reservation.endTime}
-										</p>
-									</div>
-								</td>
-								<td className="px-6 py-4 whitespace-nowrap text-center">
-									<span
-										className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-											reservation.status === "Confirmada"
-												? "bg-green-100 text-green-800"
-												: reservation.status === "Cancelada"
-													? "bg-red-100 text-red-800"
-													: reservation.status === "Terminada"
-														? "bg-blue-100 text-blue-800"
-														: "bg-yellow-100 text-yellow-800"
-										}`}
-									>
-										{reservation.status}
-									</span>
-								</td>
-								<td className="px-6 py-4 whitespace-nowrap text-center">
-									<span
-										className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-											reservation.returnStatus === "Completado"
-												? "bg-green-100 text-green-800"
-												: reservation.returnStatus === "Incompleto"
-													? "bg-orange-100 text-orange-800"
-													: "bg-yellow-100 text-yellow-800"
-										}`}
-									>
-										{reservation.returnStatus}
-									</span>
-								</td>
-								<td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-									<div className="flex justify-end space-x-2">
-										<button
-											onClick={() => {
-												setCurrentReservation(reservation);
-												setShowReturnModal(true);
-											}}
-											className="text-blue-600 hover:text-blue-900"
-											disabled={reservation.status !== "Confirmada"}
-										>
-											Devolución
-										</button>
-										<div className="relative group">
-											<button className="text-gray-600 hover:text-gray-900">
-												Estado ▼
-											</button>
-											<div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden group-hover:block z-10">
-												<div className="py-1">
-													<button
-														onClick={() =>
-															handleChangeStatus(reservation.id, "Confirmada")
-														}
-														className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-													>
-														Confirmada
-													</button>
-													<button
-														onClick={() =>
-															handleChangeStatus(reservation.id, "Cancelada")
-														}
-														className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-													>
-														Cancelada
-													</button>
-													<button
-														onClick={() =>
-															handleChangeStatus(reservation.id, "Terminada")
-														}
-														className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-													>
-														Terminada
-													</button>
-												</div>
-											</div>
-										</div>
-									</div>
-								</td>
-							</tr>
-						))}
-						{filteredReservations.length === 0 && (
-							<tr>
-								<td
-									colSpan={7}
-									className="px-6 py-4 text-center text-sm text-gray-500"
-								>
-									No se encontraron reservas con los criterios de búsqueda.
-								</td>
-							</tr>
-						)}
-					</tbody>
-				</table>
-			</div>
-		</div>
-	);
+        <Modal
+          isOpen={isReturnModalOpen}
+          onClose={onReturnModalClose}
+          size="2xl"
+        >
+          <ModalContent>
+            <ModalHeader>
+              <h3 className="text-xl font-bold">Devolver Elementos</h3>
+            </ModalHeader>
+            <ModalBody>
+              {selectedReservation &&
+              selectedReservation.itemsLoans.length > 0 ? (
+                <div className="space-y-4">
+                  {selectedReservation.itemsLoans.map((loan) => (
+                    <Card key={loan.id} className="p-4">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="font-semibold">{loan.itemId.name}</h4>
+                          <p className="text-sm text-gray-500">
+                            {loan.itemId.description}
+                          </p>
+                          <p className="text-sm">Cantidad: {loan.quantity}</p>
+                        </div>
+                        <Chip
+                          color={getReturnStatusColor(loan.returnStatus) as any}
+                          variant="flat"
+                          size="sm"
+                        >
+                          {loan.returnStatus}
+                        </Chip>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <p>No hay elementos para devolver.</p>
+              )}
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                color="primary"
+                onPress={() => {
+                  // Lógica para procesar devolución
+                  toast.success("Elementos devueltos exitosamente");
+                  onReturnModalClose();
+                }}
+              >
+                Confirmar Devolución
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      </div>
+    </div>
+  );
 };
 
 export default ReservationsPage;

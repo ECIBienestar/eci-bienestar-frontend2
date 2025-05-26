@@ -7,11 +7,13 @@ import StudentRooms from "./components/studentRooms";
 import StudentRooms2 from "./components/studentRooms2";
 import MyReservations from "./components/myReservations";
 import CreaRooms from "./components/creaRooms";
+import StatisticsPage from "./components/StatisticsPage";
 import { useEffect, useState } from "react";
 
 const RecreationalRoomsRoutes = () => {
     const [role, setRole] = useState<string | null>(null);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
     useEffect(() => {
         fetchRole();
     }, [role]);
@@ -35,6 +37,7 @@ const RecreationalRoomsRoutes = () => {
                             <>
                                 <Route path="rooms" element={<RoomsPage />} />
                                 <Route path="items" element={<ItemsPage />} />
+                                <Route path="statistics" element={<StatisticsPage />} />
                             </>
                         )}
 
