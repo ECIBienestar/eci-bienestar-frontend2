@@ -24,6 +24,7 @@ import { Role } from "./common/types";
 import { ProtectedRoute, Root } from "@common/components";
 import HealthRoutes from "./modules/appointment-management/routes/HealthRoutes";
 import SportsHome from "./modules/sports-equipment/SportsRouter.tsx";
+import { GymRoutes } from "./modules/gym-management/routes";
 
 const MODULE_MAPPING = {
   health: "turnos",
@@ -146,18 +147,20 @@ function App() {
       />
 
       {/* Módulo de Gimnasio/Seguimiento */}
-      <Route
-        path="/modules/gym/*"
-        element={
-          <Layout
-            moduleColor={moduleColors.gym}
-            activeModule={MODULE_MAPPING.gym}
-            onNotificationsClick={handleNotificationsClick}
-          >
-            <ModuleTemplate title="Gestión del Gimnasio" />
-          </Layout>
-        }
-      />
+        <Route
+          path="/modules/gym/*"
+          element={
+            <Layout
+              //Si el rol del usuario es administrador, se muestra el color del módulo en rojo
+              moduleColor={user?.role === Role.ADMINISTRATOR ? "#990000" : moduleColors.gym}
+              activeModule={MODULE_MAPPING.gym}
+              onNotificationsClick={handleNotificationsClick}
+              showSidebar={user?.role === Role.STUDENT}
+            >
+              <GymRoutes />
+            </Layout>
+          }
+        />
 
       {/* Módulo de Estadísticas */}
       <Route
